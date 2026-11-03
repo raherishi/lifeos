@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Raherishi Life OS</title>
+<meta name="theme-color" content="#0A0A0F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Life OS">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/icon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+tailwind.config = { theme: { extend: {
+  colors: { void:'#0A0A0F', health:'#22C55E', wealth:'#F59E0B', happy:'#818CF8', neutral:'#94A3B8', ink:'#F8FAFC', muted:'#64748B' },
+  fontFamily: { grotesk:['"Space Grotesk"','sans-serif'], inter:['Inter','sans-serif'] }
+} } };
+</script>
+<style>
+  :root{
+    --void:#0A0A0F; --glass:rgba(28,28,38,.85); --stroke:rgba(255,255,255,.08); --hi:rgba(255,255,255,.15);
+    --ink:#F8FAFC; --sec:#94A3B8; --mut:#64748B; --line:#27272A;
+    --health:#22C55E; --wealth:#F59E0B; --happy:#818CF8; --neutral:#94A3B8;
+    --z:var(--health);
+  }
+  html,body{margin:0;padding:0;background:var(--void);color:var(--ink);font-family:Inter,sans-serif;-webkit-tap-highlight-color:transparent}
+  body{min-height:100dvh;overscroll-behavior:none;font-size:15px;line-height:22px}
+  ::-webkit-scrollbar{display:none}
+  *{scrollbar-width:none}
+  .ambient{position:fixed;inset:0;z-index:0;pointer-events:none;transition:background .6s ease;
+    background:radial-gradient(60% 40% at 100% 0%, color-mix(in srgb,var(--z) 16%, transparent), transparent 70%),
+               radial-gradient(50% 35% at 0% 55%, color-mix(in srgb,var(--z) 8%, transparent), transparent 70%),
+               radial-gradient(60% 40% at 80% 100%, rgba(129,140,248,.07), transparent 70%)}
+  .g{font-family:"Space Grotesk",sans-serif}
+  .num{font-variant-numeric:tabular-nums}
+  .lbl{font-family:"Space Grotesk",sans-serif;font-size:11px;line-height:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .ui{font-size:12px;line-height:16px;font-weight:500;letter-spacing:.01em}
+  .sm{font-size:13px;line-height:18px}
+  .sec{color:var(--sec)} .mut{color:var(--mut)}
+  .glass{background:var(--glass);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);border:1px solid var(--stroke);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 36px rgba(0,0,0,.38);border-radius:20px}
+  .sub{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.05);border-radius:14px}
+  .deep{background:rgba(10,10,15,.7);border:1px solid rgba(255,255,255,.05);border-radius:14px}
+  .well{background:var(--void);border:1px solid var(--stroke);border-radius:12px;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+  .well:focus{border-color:#818CF8;box-shadow:0 0 0 4px rgba(129,140,248,.15)}
+  .well::placeholder{color:#475569}
+  .bare{background:transparent;border:0;outline:none;color:inherit;width:100%;min-width:0}
+  .bare::placeholder{color:#475569}
+  .bare:focus{box-shadow:0 1px 0 0 #818CF8}
+  input[type=time]{color-scheme:dark}
+  input[type=time]::-webkit-calendar-picker-indicator{opacity:.45;margin-left:2px}
+  .ico{width:20px;height:20px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .ico.fill{fill:currentColor}
+  .press{transition:transform .15s ease,background-color .2s,opacity .2s}
+  .press:active{transform:scale(.96)}
+  .chip{font-family:"Space Grotesk",sans-serif;font-size:11px;line-height:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    padding:3px 8px;border-radius:8px;background:rgba(255,255,255,.06);white-space:nowrap}
+  .bar{height:6px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}
+  .bar>i{display:block;height:100%;border-radius:99px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  .acc-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .3s ease}
+  .acc-body>div{overflow:hidden}
+  .acc.closed .acc-body{grid-template-rows:0fr}
+  .acc .chev{transition:transform .3s ease}
+  .acc.closed .chev{transform:rotate(180deg)}
+  .rng circle{transition:stroke-dashoffset .6s cubic-bezier(.2,.8,.2,1)}
+  .fade{animation:fade .35s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .strike{text-decoration:line-through;opacity:.6}
+  .sheet-wrap{position:fixed;inset:0;z-index:60;background:rgba(10,10,15,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+  .sheet-wrap.open{opacity:1;pointer-events:auto}
+  .sheet{transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);border-radius:24px 24px 0 0;width:100%;max-width:480px}
+  .sheet-wrap.open .sheet{transform:none}
+  .fab{transition:transform .25s ease, box-shadow .3s}
+  .fab.on{transform:rotate(45deg)}
+  .toast{position:fixed;left:50%;top:calc(88px + env(safe-area-inset-top));transform:translate(-50%,-12px);opacity:0;z-index:80;transition:all .25s;pointer-events:none}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  textarea{resize:none}
+  .dock a.on .dot{opacity:1}
+  .pt-safe{padding-top:env(safe-area-inset-top)}
+  .pb-safe{padding-bottom:env(safe-area-inset-bottom)}
+</style>
+</head>
+<body>
+
+<!-- ============ ICON SPRITE (inline SVG, no emoji) ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-dumbbell" viewBox="0 0 24 24"><path d="M6 7v10M18 7v10M3 9.5v5M21 9.5v5M6 12h12"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="14" rx="3"/><path d="M2.5 10.5h19M16 15h2"/><path d="M6 6l9-3 1.5 3"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-checkc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol>
+    <symbol id="i-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></symbol>
+    <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11z"/></symbol>
+    <symbol id="i-pill" viewBox="0 0 24 24"><path d="M10.5 20.5a5 5 0 0 1-7-7l6-6a5 5 0 0 1 7 7z"/><path d="M8.5 8.5l7 7"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-food" viewBox="0 0 24 24"><path d="M7 3v8M4.5 3v5a2.5 2.5 0 0 0 5 0V3M7 11v10M17.5 3C15.5 3 14 5 14 8.5V13h3.5v8"/></symbol>
+    <symbol id="i-lotus" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><path d="M12 8.5v5M6.5 11l5.5 2.5 5.5-2.5M4 20c2-3 5-4.5 8-4.5s6 1.5 8 4.5"/></symbol>
+    <symbol id="i-wind" viewBox="0 0 24 24"><path d="M3 8h10a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h6"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 0 1 2-2h14v14H6a2 2 0 0 0-2 2zm0 0a2 2 0 0 0 2 2h14v-4"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol>
+    <symbol id="i-bank" viewBox="0 0 24 24"><path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14a6 6 0 0 1 3.5 6"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h12l-2.5 4L17 12H5"/></symbol>
+    <symbol id="i-brief" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></symbol>
+    <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 3v18M17 3v18M3 7.5h4M3 16.5h4M17 7.5h4M17 16.5h4M3 12h18"/></symbol>
+    <symbol id="i-clap" viewBox="0 0 24 24"><path d="M3 10h18v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 10l1-4.5 15.5-3 1 4.5L3 10zM8 5l2.5 4M13.5 4l2.5 4"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3"/></symbol>
+    <symbol id="i-cam" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8.5 7l1.5-3h4l1.5 3"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.5s-8-5.2-8-10.7A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.8c0 5.5-8 10.7-8 10.7z"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M21.5 2.5L11 13M21.5 2.5l-7 19-3.5-8.5L2.5 9.5z"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M5 3h10l4 4v14H5z"/><path d="M15 3v4h4M8 12h8M8 16h5"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-sync" viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-14 5.3M4 12a8 8 0 0 1 14-5.3"/><path d="M18 3v4h-4M6 21v-4h4"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 19a5 5 0 1 1 .9-9.9A6 6 0 0 1 19.5 11 4 4 0 0 1 18 19z"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13M9 7V4h6v3"/></symbol>
+    <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><circle cx="5" cy="6" r="1.5"/><circle cx="5" cy="12" r="1.5"/><circle cx="5" cy="18" r="1.5"/><path d="M10 6h10M10 12h10M10 18h10"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+    <symbol id="i-logo" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" rx="9" fill="#13131A" stroke="rgba(255,255,255,.15)"/><path d="M10 23V9h6.5a4.5 4.5 0 0 1 0 9H10m6 0l5.5 5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="ambient" id="ambient"></div>
+
+<!-- ============ HEADER ============ -->
+<header class="fixed top-0 inset-x-0 z-50 pt-safe" style="background:rgba(10,10,15,.78);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,.05)">
+  <div class="h-[72px] px-5 flex items-center justify-between gap-2 max-w-[520px] mx-auto">
+    <div class="flex items-center gap-2.5 min-w-0">
+      <img src="icons/icon-192.png" alt="Raherishi" class="w-9 h-9 rounded-[10px] shrink-0" style="border:1px solid rgba(255,255,255,.12)">
+      <div class="flex flex-col min-w-0">
+        <div class="flex items-center gap-1.5 min-w-0">
+          <span class="g text-[20px] leading-7 font-semibold tracking-tight shrink-0">Raherishi</span>
+          <span class="lbl sec truncate" id="hdr-zone">• Health Hub</span>
+        </div>
+        <span class="ui sec truncate">Living beyond the charted</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 shrink-0">
+      <div class="lbl px-2.5 py-1 rounded-full flex items-center gap-1.5" style="background:rgba(255,255,255,.06)">
+        <span class="w-1.5 h-1.5 rounded-full" style="background:var(--z)"></span><span id="hdr-date" class="num">—</span>
+      </div>
+      <button class="relative w-10 h-10 rounded-full flex items-center justify-center press" data-act="tab:profile" aria-label="Profile"
+        style="background:linear-gradient(140deg,#818CF8,#22C55E 55%,#F59E0B)">
+        <span class="w-[36px] h-[36px] rounded-full flex items-center justify-center g font-bold" style="background:#13131A">R</span>
+        <span id="hdr-sync" class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2" style="border-color:#0A0A0F;background:#27272A"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ MAIN ============ -->
+<main class="relative z-10 w-full max-w-[520px] mx-auto px-4 pb-36" style="padding-top:calc(84px + env(safe-area-inset-top))">
+  <!-- Zone switcher rail -->
+  <div class="w-full p-1.5 rounded-full flex items-center justify-between mb-4" style="background:#0E0E13;border:1px solid rgba(255,255,255,.05)" id="rail"></div>
+  <div id="view"></div>
+</main>
+
+<!-- ============ FAB + DOCK ============ -->
+<nav class="dock fixed bottom-0 left-0 right-0 z-40 pb-safe pointer-events-none">
+  <div class="max-w-[520px] mx-auto px-4 pb-4 flex items-center gap-3">
+    <div class="flex-1 h-16 rounded-full flex items-center justify-around px-2 pointer-events-auto"
+      style="background:rgba(31,31,37,.82);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.08);box-shadow:0 4px 24px rgba(0,0,0,.35)" id="dock"></div>
+    <button class="fab w-14 h-14 rounded-full flex items-center justify-center pointer-events-auto press shrink-0" id="fab" data-act="fab" aria-label="Quick capture"
+      style="background:#E4E1E9;color:#131318;box-shadow:0 4px 20px rgba(0,0,0,.4),0 0 16px color-mix(in srgb,var(--z) 45%,transparent)">
+      <svg class="ico" style="width:28px;height:28px;stroke-width:2.2"><use href="#i-plus"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ============ QUICK CAPTURE SHEET ============ -->
+<div class="sheet-wrap" id="sheet" data-act="closeSheetBg">
+  <div class="sheet glass p-5 pb-8 space-y-4" style="border-radius:24px 24px 0 0" onclick="event.stopPropagation()">
+    <div class="w-12 h-1 rounded-full mx-auto" style="background:#35343a"></div>
+    <div class="flex items-center justify-between">
+      <div>
+        <h3 class="g text-[17px] font-semibold">Quick Capture</h3>
+        <p class="ui sec">Note, water, meals — one tap</p>
+      </div>
+      <button class="w-9 h-9 rounded-full flex items-center justify-center press" style="background:#35343a" data-act="closeSheet" aria-label="Close"><svg class="ico" style="width:18px;height:18px"><use href="#i-x"/></svg></button>
+    </div>
+    <textarea id="sheet-text" rows="3" class="well p-3 sm" placeholder="What's on your mind?"></textarea>
+    <div class="flex gap-2 flex-wrap" id="sheet-tags"></div>
+    <button class="w-full py-3 rounded-xl g font-semibold press" style="background:var(--z);color:#0A0A0F" data-act="sheetSave">Save note</button>
+    <div class="grid grid-cols-2 gap-2">
+      <button class="sub p-3 flex items-center gap-2.5 text-left press" data-act="qWater"><svg class="ico" style="color:#22C55E"><use href="#i-drop"/></svg><div><span class="sm font-semibold block">Next water</span><span class="ui sec">Fill next unit</span></div></button>
+      <button class="sub p-3 flex items-center gap-2.5 text-left press" data-act="qMeal"><svg class="ico" style="color:#22C55E"><use href="#i-food"/></svg><div><span class="sm font-semibold block">Tick next meal</span><span class="ui sec">Mark as logged</span></div></button>
+      <button class="sub p-3 flex items-center gap-2.5 text-left press" data-act="qMover"><svg class="ico" style="color:#818CF8"><use href="#i-lotus"/></svg><div><span class="sm font-semibold block">Next MOVER</span><span class="ui sec">Complete ritual step</span></div></button>
+      <button class="sub p-3 flex items-center gap-2.5 text-left press" data-act="sync"><svg class="ico" style="color:#F59E0B"><use href="#i-sync"/></svg><div><span class="sm font-semibold block">Sync now</span><span class="ui sec">Push to Sheets</span></div></button>
+    </div>
+  </div>
+</div>
+
+<div class="toast glass px-4 py-2.5 sm font-medium" id="toast"></div>
+
+<script>
+/* =====================================================================
+   RAHERISHI LIFE OS v3 — single-file PWA
+   localStorage cache (rishi-lifeos-v3) + Google Sheets sync (code.gs)
+   ===================================================================== */
+const KEY = 'rishi-lifeos-v3';
+const UIKEY = 'rishi-lifeos-ui';
+const CB_START = '2026-10-28';
+const TARGETS = { earning:100000, bank:150000, clients:35, dw:5 };
+const SCORE = ['#27272A','#EF4444','#F97316','#F59E0B','#84CC16','#22C55E'];
+const ZONE = { health:'#22C55E', wealth:'#F59E0B', happy:'#818CF8', profile:'#94A3B8' };
+
+const SPLITS = {
+  chest:{ name:'Chest + Triceps', tag:'Push Day', list:[['Flat Bench Press','4 × 8'],['Incline DB Press','3 × 10'],['Cable Flyes','3 × 12'],['Weighted Dips','3 × 10'],['Tricep Pushdown','3 × 12'],['Overhead Extension','3 × 12']] },
+  back: { name:'Back + Biceps', tag:'Pull Day', list:[['Lat Pulldown','4 × 10'],['Barbell Row','4 × 8'],['Seated Cable Row','3 × 12'],['Pull-ups','3 × max'],['Barbell Curl','3 × 10'],['Hammer Curl','3 × 12']] },
+  shoulder:{ name:'Shoulders', tag:'Press Day', list:[['Overhead Press','4 × 8'],['Lateral Raise','4 × 15'],['Rear Delt Fly','3 × 15'],['Arnold Press','3 × 10'],['Face Pull','3 × 15'],['Shrugs','3 × 12']] },
+  legs: { name:'Legs + Abs', tag:'Leg Day', list:[['Back Squat','4 × 8'],['Romanian Deadlift','3 × 10'],['Leg Press','3 × 12'],['Walking Lunges','3 × 20'],['Hanging Leg Raise','3 × 15'],['Plank','3 × 60s']] },
+  rest: { name:'Rest + Recovery', tag:'Rest Day', list:[['Mobility Flow','20 min'],['Easy Walk','8k steps'],['Deep Stretch','15 min']] }
+};
+const DAY_SPLIT = ['rest','chest','back','shoulder','legs','chest','back']; // Sun..Sat
+const WATER = [250,250,500,500,500,500,750,750];
+const WATER_TOTAL = WATER.reduce((a,b)=>a+b,0);
+const MEALS = [['06:29','Wake Fuel'],['08:15','Breakfast'],['10:30','Mid-Morning'],['14:00','Lunch'],['17:00','Evening Snack'],['20:00','Dinner']];
+const MOVERS = [['M','Med','Meditation','lotus'],['O','Oxy','Breathwork','wind'],['V','Viz','Visualize','eye'],['R','Read','10 pages','book'],['S','Scribe','Journal','pen']];
+const TL = [['06:29','Wake up + 500ml water'],['06:40','MOVERS ritual'],['07:30','Workout session'],['08:15','Breakfast + plan the day'],['09:00','Deep work block 1'],['10:30','Mid-morning meal'],['11:00','Client edits + calls'],['14:00','Lunch + short walk'],['15:00','Deep work block 2'],['17:00','Snack + post content'],['18:30','Shoot / outdoors / learn'],['20:00','Dinner + family time'],['22:59','Read, scribe, lights out']];
+const CB_MS = ['Register GST','Launch portfolio website','10 active clients','Hire first editor','35 active clients','₹1 Cr turnover'];
+const CONTENT = [['Post today\'s content','cam'],['Engage 10 accounts','heart'],['Pitch 1 travel brand','send'],['Script next video','note']];
+const PASSION = [['Reading 10 pages','book','book0','Book name'],['Scribing / Journal','pen','scribe0','What did you write about?'],['Watch / Film','clap','film0','What did you watch or shoot?'],['Learn 1 new thing','bulb','learn0','What did you learn today?']];
+const TAGS = [['Health','#22C55E'],['Wealth','#F59E0B'],['Happy','#818CF8'],['General','#94A3B8']];
+const IMP_CATS = ['System','Health','Wealth','Happiness','UI'];
+
+/* ---------- date helpers ---------- */
+const pad = n => String(n).padStart(2,'0');
+const ymd = d => d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const today = () => ymd(new Date());
+const parseD = s => new Date(s+'T00:00:00');
+const addDays = (s,n) => { const d=parseD(s); d.setDate(d.getDate()+n); return ymd(d); };
+const dayDiff = (a,b) => Math.round((parseD(b)-parseD(a))/864e5);
+const t12 = hm => { const [h,m]=hm.split(':').map(Number); return ((h%12)||12)+':'+pad(m)+(h<12?' AM':' PM'); };
+const splitFor = date => SPLITS[DAY_SPLIT[parseD(date).getDay()]];
+
+/* ---------- utils ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = v => parseFloat(String(v??'').replace(/[^\d.]/g,'')) || 0;
+const inr = n => '₹'+Math.round(n).toLocaleString('en-IN');
+const inrShort = n => n>=1e7 ? '₹'+(n/1e7).toFixed(2)+'Cr' : n>=1e5 ? '₹'+(n/1e5).toFixed(2)+'L' : inr(n);
+const ic = (id,cls='',style='') => `<svg class="ico ${cls}" style="${style}"><use href="#i-${id}"/></svg>`;
+const ago = ts => { const s=(Date.now()-ts)/1000; if(s<60) return 'just now'; if(s<3600) return Math.floor(s/60)+'m ago'; if(s<86400) return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; };
+
+/* ---------- state ---------- */
+const DEF_SLEEP = { at:'22:59', wake:'06:29' };
+function fresh(){
+  return { sets:{}, water:[], meals:{}, mealTxt:{}, movers:{M:false,O:false,V:false,R:false,S:false}, tl:{}, checks:{}, notes:[],
+    kpi:{earning:'',bank:'',clients:'',dw:''}, clients:[], sleep:{...DEF_SLEEP}, rating:0, wdScores:{},
+    inlines:{wg0:'',wg1:'',wg2:'',book0:'',film0:'',learn0:'',scribe0:''}, cheat:'', contentIdea:'', creatine:false, improve:[],
+    sheetsUrl:'', lastDay:today(), lastSync:0,
+    /* sync bookkeeping */ updatedAt:0, clientsAt:0, dirty:false, queue:[], delNotes:[], delImprove:[], history:{} };
+}
+let state = load();
+let ui = (()=>{ try{ return JSON.parse(localStorage.getItem(UIKEY))||{}; }catch(e){ return {}; } })();
+ui.tab = ui.tab || 'health'; ui.closed = ui.closed || {}; ui.noteFilter = ui.noteFilter || 'All'; ui.noteTag = ui.noteTag || 'General';
+ui.sheetTag = ui.sheetTag || 'General'; ui.range = ui.range || 'today'; ui.impCat = ui.impCat || 'System';
+let editSeq = 0, syncing = false, syncState = { s:'off', msg:'' };
+
+function load(){
+  let s; try{ s = JSON.parse(localStorage.getItem(KEY)); }catch(e){}
+  const base = fresh();
+  if(!s) return base;
+  const m = { ...base, ...s };
+  m.kpi = { ...base.kpi, ...(s.kpi||{}) }; m.movers = { ...base.movers, ...(s.movers||{}) };
+  m.inlines = { ...base.inlines, ...(s.inlines||{}) }; m.sleep = { ...base.sleep, ...(s.sleep||{}) };
+  return m;
+}
+function saveLocal(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){ toast('Storage full — export & clear history'); } }
+function saveUI(){ try{ localStorage.setItem(UIKEY, JSON.stringify(ui)); }catch(e){} }
+function touch(){ state.updatedAt = Date.now(); state.dirty = true; editSeq++; saveLocal(); }
+
+/* ---------- metrics ---------- */
+function sleepHrs(sl){ const [ah,am]=sl.at.split(':').map(Number), [wh,wm]=sl.wake.split(':').map(Number);
+  let m = (wh*60+wm) - (ah*60+am); if(m<0) m += 1440; return Math.round(m/6)/10; }
+function calc(date = today()){
+  const sp = splitFor(date), total = sp.list.length*3; let done = 0;
+  for(let e=0;e<sp.list.length;e++) for(let s=0;s<3;s++) if(state.sets[`${date}-e${e}-s${s}`]) done++;
+  const waterMl = state.water.reduce((a,i)=>a+(WATER[i]||0),0);
+  const meals = MEALS.filter((_,i)=>state.meals[i]).length;
+  const movers = MOVERS.filter(m=>state.movers[m[0]]).length;
+  const sh = sleepHrs(state.sleep);
+  const w = Math.round(done/total*100);
+  const d = Math.round((meals/6*0.6 + Math.min(waterMl/WATER_TOTAL,1)*0.3 + (state.creatine?0.1:0))*100);
+  const m = movers*20;
+  const live = Math.round((w + d + m + Math.min(sh/8,1)*100)/4);
+  return { sp, total, done, waterMl, meals, movers, sh, w, d, m, live };
+}
+function dayState(date){
+  const sets = {}; Object.keys(state.sets).forEach(k=>{ if(k.startsWith(date) && state.sets[k]) sets[k]=true; });
+  const checks = {}; Object.keys(state.checks).forEach(k=>{ if(/^(ct|ps)/.test(k)) checks[k]=state.checks[k]; });
+  return { sets, water:state.water, meals:state.meals, mealTxt:state.mealTxt, movers:state.movers, tl:state.tl, sleep:state.sleep,
+    rating:state.rating, creatine:state.creatine, cheat:state.cheat, checks, contentIdea:state.contentIdea, kpi:state.kpi,
+    inlines:{ book0:state.inlines.book0, scribe0:state.inlines.scribe0, film0:state.inlines.film0, learn0:state.inlines.learn0 } };
+}
+function applyDayState(ds){
+  if(!ds) return;
+  ['water','meals','mealTxt','tl','rating','creatine','cheat','contentIdea'].forEach(k=>{ if(ds[k]!==undefined) state[k]=ds[k]; });
+  if(ds.sets) state.sets = ds.sets;
+  if(ds.movers) state.movers = { ...state.movers, ...ds.movers };
+  if(ds.sleep) state.sleep = { ...state.sleep, ...ds.sleep };
+  if(ds.kpi) state.kpi = { ...state.kpi, ...ds.kpi };
+  if(ds.inlines) state.inlines = { ...state.inlines, ...ds.inlines };
+  if(ds.checks){ Object.keys(state.checks).forEach(k=>{ if(/^(ct|ps)/.test(k)) delete state.checks[k]; }); Object.assign(state.checks, ds.checks); }
+}
+function snap(date){
+  const c = calc(date);
+  const dayNotes = state.notes.filter(n=>ymd(new Date(n.ts))===date).map(n=>`[${n.tag}] ${n.text}`).join(' | ');
+  return { date, workoutPct:c.w, dietPct:c.d, moversPct:c.m, sleepHrs:c.sh, waterMl:c.waterMl,
+    earning:num(state.kpi.earning), bank:num(state.kpi.bank), clients:num(state.kpi.clients), deepWork:num(state.kpi.dw),
+    rating:state.rating, notes:dayNotes, wdScores:JSON.stringify(state.wdScores), updatedAt:state.updatedAt||Date.now(),
+    stateJson:JSON.stringify(dayState(date)) };
+}
+
+/* ---------- daily reset at midnight ---------- */
+function rollover(){
+  const t = today();
+  if(state.lastDay === t) return false;
+  const prev = state.lastDay;
+  if(prev){ const row = snap(prev); state.history[prev] = row; state.queue.push(row); }
+  state.sets = {}; state.water = []; state.meals = {}; state.mealTxt = {}; state.tl = {};
+  state.movers = {M:false,O:false,V:false,R:false,S:false}; state.sleep = {...DEF_SLEEP};
+  state.rating = 0; state.creatine = false; state.cheat = ''; state.kpi.dw = '';
+  state.inlines.scribe0 = ''; state.inlines.film0 = ''; state.inlines.learn0 = '';
+  Object.keys(state.checks).forEach(k=>{ if(/^(ct|ps)/.test(k)) delete state.checks[k]; });
+  const keys = Object.keys(state.history).sort(); while(keys.length>400) delete state.history[keys.shift()];
+  state.lastDay = t; state.updatedAt = Date.now(); state.dirty = true; editSeq++; saveLocal();
+  return true;
+}
+
+/* =====================================================================
+   RENDER
+   ===================================================================== */
+const TABS = [['health','Health','dumbbell'],['wealth','Wealth','wallet'],['happy','Happy','spark'],['profile','Profile','user']];
+const ZONE_NAME = { health:'Health Hub', wealth:'Wealth Hub', happy:'Happiness Hub', profile:'Control Room' };
+
+function render(anim){
+  const z = ZONE[ui.tab];
+  document.documentElement.style.setProperty('--z', z);
+  $('#hdr-zone').textContent = '• '+ZONE_NAME[ui.tab];
+  const t = today(), d = parseD(t);
+  const cbDay = dayDiff(CB_START, t)+1;
+  $('#hdr-date').textContent = d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + (cbDay>0 ? ' • D'+cbDay : '');
+  $('#rail').innerHTML = TABS.slice(0,3).map(([id,label,icon])=>{
+    const on = ui.tab===id, col = ZONE[id];
+    return `<button class="flex-1 py-2 px-2 rounded-full flex items-center justify-center gap-1.5 press" data-act="tab:${id}"
+      style="${on?`background:#1F1F25;color:${col};box-shadow:0 1px 8px rgba(0,0,0,.3)`:'color:#94A3B8'}">
+      ${ic(icon,'',`width:17px;height:17px;color:${col}`)}<span class="lbl">${id==='happy'?'Happiness':label}</span>
+      ${on?`<span class="w-1.5 h-1.5 rounded-full" style="background:${col};box-shadow:0 0 8px ${col}"></span>`:''}</button>`;
+  }).join('');
+  $('#dock').innerHTML = TABS.map(([id,label,icon])=>{
+    const on = ui.tab===id;
+    return `<a href="#" class="relative flex flex-col items-center justify-center min-w-[56px] min-h-[44px] press ${on?'on':''}" data-act="tab:${id}" style="color:${on?'#F8FAFC':'#94A3B8'}">
+      ${ic(icon,'',`width:22px;height:22px;color:${ZONE[id]}`)}<span class="ui mt-0.5">${label}</span>
+      <span class="dot absolute -bottom-1.5 w-1.5 h-1.5 rounded-full" style="background:${ZONE[id]};opacity:0"></span></a>`;
+  }).join('');
+  const v = $('#view');
+  v.innerHTML = `<div class="${anim?'fade ':''}space-y-4">${({health:vHealth,wealth:vWealth,happy:vHappy,profile:vProfile})[ui.tab]()}</div>`;
+  derive();
+  paintSync();
+}
+
+/* ---------- shared pieces ---------- */
+function acc(id, icon, color, title, sub, badge, body){
+  const closed = ui.closed[id];
+  return `<section class="glass acc ${closed?'closed':''} overflow-hidden" id="acc-${id}">
+    <div class="p-4 flex items-center justify-between cursor-pointer select-none gap-2" data-act="acc:${id}">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <span class="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style="background:${color}22;color:${color}">${ic(icon,'','width:18px;height:18px')}</span>
+        <div class="min-w-0"><h2 class="g text-[17px] leading-6 font-semibold truncate">${title}</h2><p class="ui sec truncate" ${sub.id?`id="${sub.id}"`:''}>${sub.text||''}</p></div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="chip num" style="color:${color}" id="${badge}"></span>
+        ${ic('chev','chev','color:#94A3B8')}
+      </div>
+    </div>
+    <div class="acc-body"><div><div class="px-4 pb-4 space-y-3">${body}</div></div></div>
+  </section>`;
+}
+function ring(id, label){
+  return `<div class="glass p-2.5 flex flex-col items-center text-center" style="border-radius:16px">
+    <div class="relative w-12 h-12 flex items-center justify-center rng">
+      <svg class="w-full h-full -rotate-90" viewBox="0 0 40 40">
+        <circle cx="20" cy="20" r="16" fill="none" stroke="#27272A" stroke-width="4"/>
+        <circle id="${id}-c" cx="20" cy="20" r="16" fill="none" stroke="#22C55E" stroke-width="4" stroke-linecap="round" stroke-dasharray="100.53" stroke-dashoffset="100.53"/>
+      </svg>
+      <span class="absolute g text-[11px] font-bold num" id="${id}-v">0%</span>
+    </div>
+    <span class="lbl mt-1.5">${label}</span>
+    <span class="text-[10px] leading-4 sec num" id="${id}-s"></span>
+  </div>`;
+}
+function setRing(id, frac, val, sub, color){
+  const c = document.getElementById(id+'-c'); if(!c) return;
+  c.setAttribute('stroke-dashoffset', (100.53*(1-Math.max(0,Math.min(1,frac)))).toFixed(2));
+  if(color) c.setAttribute('stroke', color);
+  document.getElementById(id+'-v').textContent = val;
+  document.getElementById(id+'-s').textContent = sub;
+}
+const setTxt = (id, t) => { const e=document.getElementById(id); if(e) e.textContent = t; };
+const setW = (id, p, col) => { const e=document.getElementById(id); if(e){ e.style.width = Math.max(0,Math.min(100,p))+'%'; if(col) e.style.background = col; } };
+function tick(on, color, size=22){
+  return on ? `<span class="rounded-full flex items-center justify-center shrink-0" style="width:${size}px;height:${size}px;background:${color};color:#0A0A0F">${ic('check','',`width:${size*.65}px;height:${size*.65}px;stroke-width:3`)}</span>`
+            : `<span class="block rounded-full shrink-0" style="width:${size}px;height:${size}px;border:2px solid #3F3F46"></span>`;
+}
+function box(on, color){
+  return on ? `<span class="w-6 h-6 rounded-md flex items-center justify-center shrink-0" style="background:${color};color:#0A0A0F">${ic('check','','width:16px;height:16px;stroke-width:3')}</span>`
+            : `<span class="block w-6 h-6 rounded-md shrink-0" style="background:#35343a"></span>`;
+}
+
+/* =====================================================================
+   TAB 1 — HEALTH
+   ===================================================================== */
+function vHealth(){
+  const t = today(), G = ZONE.health, c = calc(t), sp = c.sp;
+  // ISO week Mon..Sun
+  const dow = (parseD(t).getDay()+6)%7, mon = addDays(t,-dow);
+  const week = ['MON','TUE','WED','THU','FRI','SAT','SUN'].map((lab,i)=>{
+    const ds = addDays(mon,i), sc = state.wdScores[ds]||0, col = SCORE[sc], isT = ds===t;
+    return `<button class="flex flex-col items-center gap-1 press" data-act="wd:${ds}">
+      <span class="lbl" style="font-size:10px;color:${isT?'#F8FAFC':'#94A3B8'}">${lab}</span>
+      <span class="w-8 h-8 rounded-full g text-[13px] font-bold flex items-center justify-center num"
+        style="background:${sc?col+'26':'#1F1F25'};color:${sc?col:'#64748B'};${isT?`box-shadow:0 0 0 2px #0A0A0F,0 0 0 3.5px ${sc?col:'#94A3B8'}`:''}">${sc||'–'}</span>
+    </button>`;
+  }).join('');
+  const rate = [1,2,3,4,5].map(n=>{
+    const on = state.rating===n, col = SCORE[n];
+    return `<button class="flex-1 h-8 rounded-lg g text-[12px] font-bold press" data-act="rate:${n}"
+      style="background:${on?col:col+'1F'};color:${on?'#0A0A0F':col};${on?`box-shadow:0 0 10px ${col}88`:''}">${n}</button>`;
+  }).join('');
+  const ex = sp.list.map(([name,tgt],e)=>{
+    const dots = [0,1,2].map(s=>{ const on = state.sets[`${t}-e${e}-s${s}`];
+      return `<button class="w-7 h-7 flex items-center justify-center press" data-act="set:${e}:${s}" aria-label="Set ${s+1}">
+        <span class="w-3 h-3 rounded-full" style="background:${on?G:'#35343a'};${on?`box-shadow:0 0 6px ${G}`:''}"></span></button>`; }).join('');
+    const all = [0,1,2].every(s=>state.sets[`${t}-e${e}-s${s}`]);
+    return `<div class="sub p-2.5">
+      <span class="g text-[13px] font-semibold block truncate" style="${all?`color:${G}`:''}">${esc(name)}</span>
+      <div class="flex items-center justify-between -mb-1"><span class="ui sec">${tgt}</span><div class="flex -mr-1.5">${dots}</div></div>
+    </div>`;
+  }).join('');
+  const workout = `
+    <div class="deep p-3 flex items-center justify-between">${week}</div>
+    <div class="sub p-3 space-y-2.5">
+      <div class="flex items-center justify-between">
+        <span class="sm font-semibold">${sp.tag} • ${sp.name}</span>
+        <span class="lbl" style="color:${G}" id="wo-pct"></span>
+      </div>
+      <div class="bar"><i id="wo-bar" style="background:${G};box-shadow:0 0 8px ${G}"></i></div>
+      <div class="flex items-center justify-between gap-3 pt-0.5">
+        <span class="ui sec shrink-0">Session rating</span>
+        <div class="flex gap-1.5 flex-1">${rate}</div>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-2">${ex}</div>`;
+
+  const drops = WATER.map((ml,i)=>{ const on = state.water.includes(i);
+    return `<button class="flex flex-col items-center gap-0.5 press" data-act="water:${i}" aria-label="${ml} ml">
+      ${ic('drop',on?'fill':'',`width:${ml===750?26:ml===500?23:20}px;height:${ml===750?26:ml===500?23:20}px;color:${on?G:'#35343a'}`)}
+      <span class="text-[9px] leading-3 num" style="color:${on?G:'#64748B'}">${ml}</span></button>`; }).join('');
+  const meals = MEALS.map(([tm,name],i)=>{ const on = !!state.meals[i];
+    return `<div class="sub p-2.5 flex items-center gap-2.5">
+      <button class="press" data-act="meal:${i}" aria-label="Toggle ${name}">${tick(on,G)}</button>
+      <div class="flex-1 min-w-0">
+        <span class="g text-[13px] font-medium num">${t12(tm)} • ${name}</span>
+        <input class="bare ui sec block mt-0.5" data-in="mealTxt.${i}" value="${esc(state.mealTxt[i]||'')}" placeholder="What did you eat?">
+      </div>
+      <span class="lbl shrink-0" style="color:${on?G:'#64748B'}">${on?'Logged':'Pending'}</span>
+    </div>`; }).join('');
+  const diet = `
+    <div class="sub p-3 space-y-2">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-1.5">${ic('drop','',`width:16px;height:16px;color:${G}`)}<span class="sm font-semibold">Hydration Tracker</span></div>
+        <span class="lbl sec num" id="water-stat"></span>
+      </div>
+      <div class="flex items-end justify-between pt-1 px-0.5">${drops}</div>
+    </div>
+    <div class="space-y-1.5">${meals}</div>
+    <div class="deep p-2.5 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2 min-w-0">${ic('pill','',`width:18px;height:18px;color:${G}`)}<span class="sm">Creatine Monohydrate (5g)</span></div>
+      <button class="px-3 py-1 rounded-full lbl flex items-center gap-1 press shrink-0" data-act="creatine"
+        style="${state.creatine?`background:${G};color:#0A0A0F;box-shadow:0 0 8px ${G}`:'background:#35343a;color:#94A3B8'}">
+        ${ic(state.creatine?'check':'circle','','width:13px;height:13px;stroke-width:3')} ${state.creatine?'Taken':'Not yet'}</button>
+    </div>
+    <div class="space-y-1.5">
+      <span class="lbl sec">Cheat / junk note</span>
+      <textarea class="well p-2.5 sm" rows="2" data-in="cheat" placeholder="Anything off-plan today?">${esc(state.cheat)}</textarea>
+    </div>`;
+
+  const tiles = MOVERS.map(([k,short,sub,icon])=>{ const on = state.movers[k];
+    return `<button class="p-2 rounded-xl flex flex-col items-center text-center gap-1 press" data-act="mover:${k}"
+      style="background:${on?'#1F1F25':'#0E0E13'};border:1px solid ${on?G+'40':'rgba(255,255,255,.05)'}">
+      <span class="g text-[13px] font-bold" style="color:${on?G:'#94A3B8'}">${k}</span>
+      ${ic(icon,'',`width:18px;height:18px;color:${on?'#F8FAFC':'#64748B'}`)}
+      <span class="text-[10px] leading-3 sec truncate w-full">${short}</span>
+      <span class="w-1.5 h-1.5 rounded-full" style="background:${on?G:'#35343a'};${on?`box-shadow:0 0 6px ${G}`:''}"></span>
+    </button>`; }).join('');
+  const pending = MOVERS.filter(m=>!state.movers[m[0]]);
+  const movers = `
+    <div class="grid grid-cols-5 gap-1.5">${tiles}</div>
+    <div class="deep p-2.5 flex items-center justify-between gap-2">
+      <span class="ui sec">${pending.length?pending.map(p=>p[2]).join(', ')+' pending':'Ritual complete — mind primed'}</span>
+      ${pending.length?`<button class="lbl press shrink-0" style="color:${G}" data-act="qMover">Quick complete</button>`:ic('checkc','',`color:${G}`)}
+    </div>`;
+
+  const tl = TL.map(([tm,label],i)=>{ const on = !!state.tl[i], last = i===TL.length-1;
+    return `<button class="w-full flex items-stretch gap-3 text-left press" data-act="tl:${i}">
+      <div class="flex flex-col items-center w-5 shrink-0">
+        <span class="block w-3.5 h-3.5 rounded-full mt-1 shrink-0" style="background:${on?G:'#0A0A0F'};border:2px solid ${on?G:'#3F3F46'};${on?`box-shadow:0 0 6px ${G}`:''}"></span>
+        ${last?'':`<span class="block w-px flex-1 my-0.5" style="background:${on?G+'66':'#27272A'}"></span>`}
+      </div>
+      <div class="flex-1 flex items-center justify-between pb-2.5 gap-2">
+        <span class="sm ${on?'strike':''}">${label}</span>
+        <span class="lbl num shrink-0" style="color:${on?G:'#64748B'}">${t12(tm)}</span>
+      </div></button>`; }).join('');
+  const sleep = `
+    <div class="grid grid-cols-2 gap-2">
+      <label class="sub p-3 space-y-1 block">
+        <span class="ui sec flex items-center justify-between">Slept at ${ic('moon','',`width:15px;height:15px;color:${G}`)}</span>
+        <input type="time" class="bare g text-[17px] font-semibold num" data-in="sleep.at" value="${state.sleep.at}">
+        <span class="lbl" style="font-size:10px;color:${G}">Target 22:59</span>
+      </label>
+      <label class="sub p-3 space-y-1 block">
+        <span class="ui sec flex items-center justify-between">Woke at ${ic('sun','','width:15px;height:15px;color:#F59E0B')}</span>
+        <input type="time" class="bare g text-[17px] font-semibold num" data-in="sleep.wake" value="${state.sleep.wake}">
+        <span class="lbl sec num" style="font-size:10px" id="sleep-win"></span>
+      </label>
+    </div>
+    <div class="sub p-3">
+      <div class="flex items-center justify-between mb-3"><span class="sm font-semibold">Daily Routine Timeline</span><span class="lbl num" style="color:${G}" id="tl-count"></span></div>
+      ${tl}
+    </div>`;
+
+  return `
+  <div class="glass px-4 py-3 flex items-center justify-between gap-2" style="border-radius:16px">
+    <div class="flex items-center gap-2.5 min-w-0">${ic('film','',`color:${G}`)}
+      <div class="min-w-0"><span class="g text-[13px] font-semibold block truncate">${sp.tag} • ${sp.name}</span><span class="ui sec truncate block">"Living beyond the charted"</span></div>
+    </div>
+    <span class="chip num" style="color:${G}" id="live-pct"></span>
+  </div>
+  <div class="grid grid-cols-4 gap-2">${ring('r-w','Workout')}${ring('r-d','Diet')}${ring('r-m','Movers')}${ring('r-s','Sleep')}</div>
+  ${acc('workout','dumbbell',G,'Workout Session',{text:`${sp.name} • Week ${isoWeek(t)}`},'b-wo',workout)}
+  ${acc('diet','food',G,'Diet & Hydration',{id:'diet-sub'},'b-diet',diet)}
+  ${acc('movers','lotus',G,'M.O.V.E.R.S. Ritual',{id:'mov-sub'},'b-mov',movers)}
+  ${acc('sleep','moon',G,'Sleep Optimization',{id:'sleep-sub'},'b-sleep',sleep)}`;
+}
+function isoWeek(s){ const d=parseD(s); d.setDate(d.getDate()+3-((d.getDay()+6)%7)); const w1=new Date(d.getFullYear(),0,4);
+  return 1+Math.round(((d-w1)/864e5-3+((w1.getDay()+6)%7))/7); }
+
+/* =====================================================================
+   TAB 2 — WEALTH
+   ===================================================================== */
+function vWealth(){
+  const A = ZONE.wealth, t = today();
+  const kpi = (key,label,icon,unit,sub) => `
+    <div class="glass p-4 flex flex-col gap-2 relative overflow-hidden" style="border-radius:18px">
+      <div class="absolute top-0 right-0 w-16 h-16 rounded-bl-full pointer-events-none" style="background:${A}0D"></div>
+      <div class="flex items-start justify-between gap-1">
+        <span class="lbl sec">${label}</span>
+        <span class="chip num" style="color:${A};background:${A}1A" id="k-${key}-chip"></span>
+      </div>
+      <div class="flex items-baseline gap-1 min-w-0">
+        ${unit==='₹'?`<span class="g text-[24px] font-bold" style="color:${A}">₹</span>`:''}
+        <input class="bare g text-[26px] leading-8 font-bold num" style="letter-spacing:-.02em" inputmode="decimal" data-in="kpi.${key}" value="${esc(state.kpi[key])}" placeholder="0">
+        ${unit!=='₹'?`<span class="ui sec shrink-0">${unit}</span>`:''}
+      </div>
+      <span class="ui sec num -mt-1" id="k-${key}-sub">${sub}</span>
+      <div class="bar"><i id="k-${key}-bar" style="background:${A}"></i></div>
+      <div class="flex items-center justify-between"><span class="lbl num" style="color:${A}" id="k-${key}-pct">0%</span><span class="lbl sec">Target</span></div>
+    </div>`;
+  const cbDay = dayDiff(CB_START, t)+1;
+  const ms = CB_MS.map((m,i)=>{ const on = !!state.checks['cb'+i];
+    return `<button class="w-full p-2.5 sub flex items-center gap-2.5 text-left press" data-act="chk:cb${i}">
+      ${on?ic('checkc','',`color:${A}`):ic('circle','','color:#64748B')}
+      <span class="sm flex-1 ${on?'strike':''}">${m}</span>
+      <span class="lbl shrink-0" style="color:${on?A:'#64748B'}">${on?'Done':'M'+(i+1)}</span></button>`; }).join('');
+  const clients = state.clients.map((c,i)=>`
+    <div class="sub p-2 flex items-center gap-2">
+      <span class="w-8 h-8 rounded-full flex items-center justify-center lbl shrink-0 num" style="background:${A}26;color:${A}">${pad(i+1)}</span>
+      <input class="bare sm font-semibold flex-1" data-in="clients.${i}.n" value="${esc(c.n)}" placeholder="Client name">
+      <div class="flex items-center gap-0.5 w-[96px] shrink-0 rounded-lg px-2 py-1" style="background:#0A0A0F">
+        <span class="sm" style="color:${A}">₹</span><input class="bare sm font-semibold num text-right" inputmode="decimal" data-in="clients.${i}.a" value="${esc(c.a)}" placeholder="0">
+      </div>
+      <button class="w-7 h-7 flex items-center justify-center press shrink-0" data-act="delClient:${i}" aria-label="Remove client">${ic('x','','width:16px;height:16px;color:#64748B')}</button>
+    </div>`).join('');
+  const goals = [0,1,2].map(i=>{ const on = !!state.checks['g'+i];
+    return `<div class="sub p-3 flex items-center gap-3">
+      <button class="press" data-act="chk:g${i}" aria-label="Toggle goal">${box(on,A)}</button>
+      <input class="bare sm flex-1 ${on?'strike':''}" data-in="inlines.wg${i}" value="${esc(state.inlines['wg'+i])}" placeholder="Weekly goal ${i+1}">
+    </div>`; }).join('');
+  const goalsDone = [0,1,2].filter(i=>state.checks['g'+i]).length;
+
+  return `
+  <div class="w-full relative overflow-hidden glass p-4" style="border-radius:18px;background:linear-gradient(90deg,rgba(42,41,47,.9),rgba(28,28,38,.85),rgba(14,14,19,.9))">
+    <div class="absolute -right-6 -bottom-6 w-28 h-28 rounded-full blur-2xl pointer-events-none" style="background:${A}1A"></div>
+    <div class="flex items-center justify-between relative">
+      <div><div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full" style="background:${A}"></span><span class="lbl" style="color:${A}">Operating Cockpit</span></div>
+        <p class="g text-[20px] leading-7 font-semibold mt-0.5">Living beyond the charted</p></div>
+      <span class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#35343a;color:${A}">${ic('trend')}</span>
+    </div>
+  </div>
+  <div class="grid grid-cols-2 gap-2.5">
+    ${kpi('earning','Monthly Earning','trend','₹','of ₹1,00,000 goal')}
+    ${kpi('bank','Bank Balance','bank','₹','of ₹1,50,000 reserve')}
+    ${kpi('clients','Active Clients','users','/ 35','Direct mandates')}
+    ${kpi('dw','Deep Work','clock','/ 5h','Today’s focused hours')}
+  </div>
+
+  <section class="glass p-4 space-y-3 relative overflow-hidden" style="box-shadow:0 4px 24px rgba(245,158,11,.1),inset 0 1px 0 rgba(255,255,255,.06)">
+    <div class="flex items-start justify-between gap-2">
+      <div class="min-w-0">
+        <div class="flex items-center gap-1.5">${ic('cal','',`width:16px;height:16px;color:${A}`)}<span class="lbl" style="color:${A}">365-Day Odyssey Tracker</span></div>
+        <h2 class="g text-[20px] leading-7 font-semibold mt-0.5 truncate">Creative Bunai • Film &amp; Brand Lab</h2>
+      </div>
+      <span class="chip num shrink-0" style="color:${A};background:${A}1A">${cbDay>0?`Day ${Math.min(cbDay,365)} / 365`:`In ${1-cbDay}d`}</span>
+    </div>
+    <div class="deep p-3 space-y-2">
+      <div class="flex items-center justify-between"><span class="ui">Started 28 Oct 2026</span><span class="lbl num" style="color:${A}">${(Math.max(0,Math.min(cbDay,365))/365*100).toFixed(1)}% of Year 1</span></div>
+      <div class="bar"><i style="width:${Math.max(0,Math.min(cbDay,365))/365*100}%;background:${A};box-shadow:0 0 8px ${A};min-width:6px"></i></div>
+    </div>
+    <div class="rounded-xl p-4 relative overflow-hidden" style="background:radial-gradient(120% 140% at 85% 0%, ${A}33, transparent 55%),linear-gradient(160deg,#1C1C26,#0E0E13);border:1px solid rgba(255,255,255,.06)">
+      <div class="flex items-end justify-between">
+        <div><span class="lbl" style="color:${A}">Milestones</span><p class="g text-[34px] leading-10 font-bold num">${CB_MS.filter((_,i)=>state.checks['cb'+i]).length}<span class="text-[17px] sec"> / 6</span></p></div>
+        <div class="text-right"><span class="lbl sec">Days left</span><p class="g text-[22px] font-bold num">${Math.max(0,365-Math.max(cbDay,0))}</p></div>
+      </div>
+    </div>
+    <div class="space-y-1.5">${ms}</div>
+  </section>
+
+  <section class="glass p-4 space-y-3">
+    <div class="flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2">${ic('brief','',`color:${A}`)}<h3 class="g text-[20px] leading-7 font-semibold whitespace-nowrap">Client Pipeline</h3></div>
+      <span class="lbl sec num" id="pipe-total"></span>
+    </div>
+    <div class="space-y-1.5" id="pipe-list">${clients||`<p class="ui sec px-1">No clients yet — add your first one.</p>`}</div>
+    <button class="w-full py-2.5 rounded-xl lbl flex items-center justify-center gap-1.5 press" style="border:1px dashed ${A}66;color:${A}" data-act="addClient">${ic('plus','','width:16px;height:16px')} Add client</button>
+  </section>
+
+  <section class="glass p-4 space-y-3">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">${ic('checkc','',`color:${A}`)}<h3 class="g text-[20px] leading-7 font-semibold">Weekly Focus</h3></div>
+      <span class="lbl num" style="color:${A}">${goalsDone} / 3 Cleared</span>
+    </div>
+    <div class="space-y-1.5">${goals}</div>
+  </section>`;
+}
+
+/* =====================================================================
+   TAB 3 — HAPPINESS
+   ===================================================================== */
+function vHappy(){
+  const P = ZONE.happy;
+  const ct = CONTENT.map(([label,icon],i)=>{ const on = !!state.checks['ct'+i];
+    return `<button class="w-full sub p-3 flex items-center gap-3 text-left press" data-act="chk:ct${i}">
+      ${tick(on,P)}<span class="sm flex-1 ${on?'strike':''}">${label}</span>${ic(icon,'',`width:18px;height:18px;color:${on?P:'#64748B'}`)}</button>`; }).join('');
+  const ctDone = CONTENT.filter((_,i)=>state.checks['ct'+i]).length;
+  const ps = PASSION.map(([label,icon,key,ph],i)=>{ const on = !!state.checks['ps'+i];
+    return `<div class="sub p-3 space-y-1.5">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">${ic(icon,'',`width:18px;height:18px;color:${P}`)}<span class="g text-[15px] font-semibold">${label}</span></div>
+        <button class="press" data-act="ps:${i}" aria-label="Toggle ${label}">${tick(on,P)}</button>
+      </div>
+      <input class="bare sm sec" data-in="inlines.${key}" value="${esc(state.inlines[key])}" placeholder="${ph}">
+    </div>`; }).join('');
+  const psDone = PASSION.filter((_,i)=>state.checks['ps'+i]).length;
+  const filters = ['All',...TAGS.map(t=>t[0])].map(f=>{
+    const col = f==='All'?'#F8FAFC':TAGS.find(t=>t[0]===f)[1], on = ui.noteFilter===f;
+    const n = f==='All'?state.notes.length:state.notes.filter(x=>x.tag===f).length;
+    return `<button class="px-3 py-1 rounded-full ui shrink-0 press" data-act="nf:${f}" style="background:${on?col+'26':'#1B1B20'};color:${on?col:'#94A3B8'};border:1px solid ${on?col+'55':'transparent'}">${f} (${n})</button>`; }).join('');
+  const composerTags = TAGS.map(([tg,col])=>{ const on = ui.noteTag===tg;
+    return `<button class="px-2.5 py-1 rounded-full ui press" data-act="nt:${tg}" style="background:${on?col:'#1B1B20'};color:${on?'#0A0A0F':col}">${tg}</button>`; }).join('');
+
+  return `
+  <div class="glass p-4 relative overflow-hidden" style="border-radius:18px;background:linear-gradient(90deg,rgba(42,41,47,.9),rgba(28,28,38,.85),rgba(14,14,19,.9))">
+    <div class="absolute -right-6 -top-6 w-28 h-28 rounded-full blur-2xl pointer-events-none" style="background:${P}26"></div>
+    <div class="flex items-center justify-between relative">
+      <div><div class="flex items-center gap-1.5"><span class="lbl" style="color:${P}">Creative Pulse</span><span class="ui sec">• Zone 03 active</span></div>
+        <p class="g text-[20px] leading-7 font-semibold mt-0.5">Directing Mind &amp; Flow</p></div>
+      <span class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#35343a;color:${P}">${ic('spark')}</span>
+    </div>
+  </div>
+
+  <section class="glass p-4 space-y-3">
+    <div class="flex items-start justify-between gap-2">
+      <div class="flex items-start gap-2.5">${ic('video','mt-1',`color:${P}`)}
+        <div><h2 class="g text-[20px] leading-7 font-semibold">Creator Engine</h2><p class="ui sec">@raherishi • Filmmaker &amp; travel creator</p></div></div>
+      <span class="chip num shrink-0" style="color:${P};background:${P}1A">${ctDone} / 4 Done</span>
+    </div>
+    <div class="space-y-1.5">${ct}</div>
+    <div class="space-y-1.5 pt-1">
+      <span class="lbl sec">Content idea</span>
+      <textarea class="well p-3 sm" rows="3" data-in="contentIdea" placeholder="Hook, location, shot list…">${esc(state.contentIdea)}</textarea>
+    </div>
+  </section>
+
+  <section class="glass p-4 space-y-3">
+    <div class="flex items-start justify-between gap-2">
+      <div><h2 class="g text-[20px] leading-7 font-semibold">Daily Mind &amp; Craft</h2><p class="ui sec">Passion tracker • inputs shaping your art</p></div>
+      <span class="chip num shrink-0" style="color:${P};background:${P}1A">${psDone} / 4 Logged</span>
+    </div>
+    <div class="space-y-1.5">${ps}</div>
+  </section>
+
+  <section class="space-y-3 pt-1">
+    <div class="flex items-center justify-between px-1">
+      <div class="flex items-center gap-1.5"><h2 class="g text-[20px] leading-7 font-semibold">Brain Dump &amp; Log</h2><span class="w-1.5 h-1.5 rounded-full" style="background:${P}"></span></div>
+      <button class="lbl press flex items-center gap-1" style="color:${P}" data-act="fab">${ic('plus','','width:14px;height:14px')} Quick note</button>
+    </div>
+    <div class="flex gap-2 overflow-x-auto pb-1">${filters}</div>
+    <div class="glass p-3 space-y-2">
+      <textarea id="note-text" class="well p-3 sm" rows="2" placeholder="Capture a thought…"></textarea>
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex gap-1.5 flex-wrap">${composerTags}</div>
+        <button class="px-3.5 py-1.5 rounded-lg lbl press shrink-0" style="background:${P};color:#0A0A0F" data-act="addNote">Add</button>
+      </div>
+    </div>
+    <div class="space-y-2.5 max-h-[560px] overflow-y-auto" id="feed">${feedHTML()}</div>
+  </section>`;
+}
+function feedHTML(){
+  const list = state.notes.filter(n=>ui.noteFilter==='All'||n.tag===ui.noteFilter).sort((a,b)=>b.ts-a.ts);
+  if(!list.length) return `<div class="glass p-5 text-center"><p class="sm sec">No notes yet. Tap + to capture one.</p></div>`;
+  return list.map(n=>{ const col = (TAGS.find(t=>t[0]===n.tag)||TAGS[3])[1], d = new Date(n.ts);
+    return `<article class="glass p-4 space-y-2">
+      <div class="flex items-center justify-between">
+        <span class="px-2 py-0.5 rounded-md ui" style="background:${col}1F;color:${col}">${esc(n.tag)}</span>
+        <div class="flex items-center gap-2"><span class="ui sec num">${ago(n.ts)}</span>
+        <button class="press" data-act="delNote:${n.ts}" aria-label="Delete note">${ic('trash','','width:15px;height:15px;color:#64748B')}</button></div>
+      </div>
+      <p class="text-[16px] leading-6 whitespace-pre-wrap">${esc(n.text)}</p>
+      <div class="flex items-center gap-1.5 ui mut">${ic('clock','','width:13px;height:13px')}<span class="num">${d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})} • ${d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</span></div>
+    </article>`; }).join('');
+}
+
+/* =====================================================================
+   TAB 4 — PROFILE
+   ===================================================================== */
+function vProfile(){
+  const N = ZONE.profile, P = ZONE.happy;
+  const imps = [...state.improve].sort((a,b)=>b.ts-a.ts).map(m=>`
+    <div class="sub p-3 flex items-start gap-2.5">
+      ${ic('bulb','mt-0.5','width:16px;height:16px;color:#F59E0B')}
+      <div class="flex-1 min-w-0"><p class="sm">${esc(m.text)}</p><span class="ui mut">${esc(m.cat)} • ${new Date(m.ts).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span></div>
+      <button class="press" data-act="delImp:${m.ts}" aria-label="Delete">${ic('trash','','width:15px;height:15px;color:#64748B')}</button>
+    </div>`).join('');
+  const cats = IMP_CATS.map(c=>`<option ${ui.impCat===c?'selected':''}>${c}</option>`).join('');
+  const ranges = [['today','Today'],['week','Last Week'],['month','Last Month']].map(([k,l])=>{ const on = ui.range===k;
+    return `<button class="flex-1 py-2 rounded-full lbl press" data-act="range:${k}" style="${on?'background:#1F1F25;color:#F8FAFC;box-shadow:0 1px 8px rgba(0,0,0,.3)':'color:#94A3B8'}">${l}</button>`; }).join('');
+
+  return `
+  <section class="glass p-5 relative overflow-hidden">
+    <div class="absolute -right-10 -top-10 w-40 h-40 rounded-full blur-3xl pointer-events-none" style="background:linear-gradient(140deg,#818CF8,#22C55E);opacity:.18"></div>
+    <div class="flex items-center gap-4 relative">
+      <div class="w-[72px] h-[72px] rounded-full p-[2px] shrink-0" style="background:linear-gradient(140deg,#818CF8,#22C55E 55%,#F59E0B)">
+        <div class="w-full h-full rounded-full flex items-center justify-center g text-[30px] font-bold" style="background:#13131A">R</div>
+      </div>
+      <div class="min-w-0">
+        <h2 class="g text-[24px] leading-8 font-semibold">Rishi Sengar</h2>
+        <p class="sm" style="color:${P}">@raherishi</p>
+        <p class="ui sec mt-1 flex items-center gap-1">${ic('pin','','width:13px;height:13px')} Indore • Filmmaker &amp; travel creator</p>
+      </div>
+    </div>
+    <p class="sm sec mt-4 relative">Founder, Creative Bunai. Building health, wealth and happiness — one logged day at a time.</p>
+    <div class="grid grid-cols-3 gap-2 mt-4 relative">
+      <div class="sub p-2.5 text-center"><p class="g text-[20px] font-bold num" id="p-days">0</p><p class="lbl sec" style="font-size:10px">Days logged</p></div>
+      <div class="sub p-2.5 text-center"><p class="g text-[20px] font-bold num">${state.notes.length}</p><p class="lbl sec" style="font-size:10px">Notes</p></div>
+      <div class="sub p-2.5 text-center"><p class="g text-[20px] font-bold num">${Math.max(0,dayDiff(CB_START,today())+1)}</p><p class="lbl sec" style="font-size:10px">CB day</p></div>
+    </div>
+  </section>
+
+  ${acc('settings','gear',N,'Settings',{text:'Google Sheets sync'},'b-sync',`
+    <div class="space-y-1.5">
+      <span class="lbl sec">Google Sheets Web App URL</span>
+      <div class="flex gap-2">
+        <input class="well px-3 py-2.5 sm" id="sheets-url" value="${esc(state.sheetsUrl)}" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" spellcheck="false">
+        <button class="px-3 rounded-xl lbl press shrink-0" style="background:#35343a" data-act="saveUrl">Save</button>
+      </div>
+    </div>
+    <div class="sub p-3 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <span class="w-2.5 h-2.5 rounded-full shrink-0" id="sync-dot"></span>
+        <div class="min-w-0"><p class="sm font-semibold" id="sync-title"></p><p class="ui sec truncate" id="sync-msg"></p></div>
+      </div>
+      <button class="px-3.5 py-2 rounded-xl lbl flex items-center gap-1.5 press shrink-0" style="background:#22C55E;color:#0A0A0F" data-act="sync">${ic('sync','','width:15px;height:15px;stroke-width:2.4')} Sync now</button>
+    </div>
+    <p class="ui mut">Auto-sync runs every 30 s while a URL is set. Saves land on this device first, then go to Sheets in the background.</p>`)}
+
+  ${acc('improve','bulb','#F59E0B','System Improvements',{text:`${state.improve.length} ideas logged`},'b-imp',`
+    <textarea id="imp-text" class="well p-3 sm" rows="2" placeholder="What would make this system better?"></textarea>
+    <div class="flex gap-2">
+      <select id="imp-cat" class="well px-3 py-2 sm flex-1">${cats}</select>
+      <button class="px-4 rounded-xl lbl press" style="background:#F59E0B;color:#0A0A0F" data-act="addImp">Add idea</button>
+    </div>
+    <div class="space-y-1.5">${imps||'<p class="ui sec px-1">No ideas yet.</p>'}</div>`)}
+
+  ${acc('export','down',P,'Export Reports',{text:'CSV + TXT downloads'},'b-exp',`
+    <div class="p-1 rounded-full flex" style="background:#0E0E13">${ranges}</div>
+    <pre class="deep p-3 text-[11px] leading-4 whitespace-pre-wrap max-h-[300px] overflow-y-auto num" style="font-family:ui-monospace,Menlo,monospace;color:#C6C5D5" id="report">Building report…</pre>
+    <div class="grid grid-cols-2 gap-2">
+      <button class="py-2.5 rounded-xl lbl flex items-center justify-center gap-1.5 press" style="background:${P};color:#0A0A0F" data-act="csv">${ic('down','','width:15px;height:15px;stroke-width:2.4')} Export CSV</button>
+      <button class="py-2.5 rounded-xl lbl flex items-center justify-center gap-1.5 press" style="background:#35343a" data-act="txt">${ic('note','','width:15px;height:15px')} Export TXT</button>
+    </div>`)}
+
+  <section class="glass p-4 space-y-3">
+    <div class="flex items-center gap-2">${ic('db','',`color:${N}`)}<h3 class="g text-[17px] font-semibold">Storage</h3></div>
+    <div class="grid grid-cols-2 gap-2 sm" id="storage"></div>
+    <button class="w-full py-3 rounded-xl lbl flex items-center justify-center gap-1.5 press" style="background:#EF44441A;color:#EF4444;border:1px solid #EF444440" data-act="resetToday">${ic('reset','','width:15px;height:15px')} Reset today's data</button>
+  </section>`;
+}
+
+/* =====================================================================
+   DERIVED VALUES (update without rebuilding inputs)
+   ===================================================================== */
+function derive(){
+  const G = ZONE.health, A = ZONE.wealth;
+  if(ui.tab==='health'){
+    const c = calc();
+    setRing('r-w', c.w/100, c.w+'%', `${c.done}/${c.total} sets`);
+    setRing('r-d', c.d/100, c.d+'%', `${c.meals}/6 meals`);
+    setRing('r-m', c.m/100, c.m+'%', `${c.movers}/5 done`);
+    setRing('r-s', c.sh/8, c.sh+'h', c.sh>=7?'Recovered':'Short');
+    setTxt('live-pct', 'Live '+c.live+'%');
+    setTxt('wo-pct', c.w+'% Done'); setW('wo-bar', c.w);
+    setTxt('b-wo', `${c.done}/${c.total}`);
+    setTxt('water-stat', `${(c.waterMl/1000).toFixed(2).replace(/0$/,'')}L / ${WATER_TOTAL/1000}L`);
+    setTxt('b-diet', `${(c.waterMl/1000).toFixed(1)}L`);
+    setTxt('diet-sub', `${c.meals}/6 meals • creatine ${state.creatine?'taken':'pending'}`);
+    setTxt('b-mov', `${c.m}%`); setTxt('mov-sub', `${c.movers}/5 completed • Mind mastery`);
+    const hh = Math.floor(c.sh), mm = Math.round((c.sh-hh)*60);
+    setTxt('b-sleep', `${c.sh} H`); setTxt('sleep-sub', `Slept ${hh}h ${pad(mm)}m • target 7h 30m`);
+    setTxt('sleep-win', `${hh}h ${pad(mm)}m window`);
+    setTxt('tl-count', `${Object.values(state.tl).filter(Boolean).length} / ${TL.length}`);
+  }
+  if(ui.tab==='wealth'){
+    const k = state.kpi;
+    [['earning',v=>`${inr(v)} of ${inr(TARGETS.earning)}`],['bank',v=>`${inr(v)} of ${inr(TARGETS.bank)}`],
+     ['clients',()=> 'Direct mandates'],['dw',()=> 'Today’s focused hours']].forEach(([key,sub])=>{
+      const v = num(k[key]), p = Math.round(v/TARGETS[key]*100);
+      setTxt(`k-${key}-pct`, p+'%'); setW(`k-${key}-bar`, p);
+      setTxt(`k-${key}-chip`, key==='earning'||key==='bank' ? inrShort(v) : p>=100?'Hit':(+(TARGETS[key]-v).toFixed(1))+(key==='dw'?'h':'')+' left');
+      setTxt(`k-${key}-sub`, sub(v));
+    });
+    const tot = state.clients.reduce((a,c)=>a+num(c.a),0);
+    setTxt('pipe-total', `${state.clients.length} • ${inrShort(tot)}/mo`);
+  }
+  if(ui.tab==='profile'){
+    setTxt('p-days', Object.keys(state.history).length+1);
+    setTxt('b-imp', state.improve.length);
+    setTxt('b-exp', ({today:'Today',week:'7D',month:'30D'})[ui.range]);
+    const bytes = new Blob([localStorage.getItem(KEY)||'']).size;
+    const st = document.getElementById('storage');
+    if(st) st.innerHTML = [['Local cache',(bytes/1024).toFixed(1)+' KB'],['History days',Object.keys(state.history).length],
+      ['Notes / ideas',state.notes.length+' / '+state.improve.length],['Last sync',state.lastSync?ago(state.lastSync):'never']]
+      .map(([l,v])=>`<div class="sub p-3"><p class="ui sec">${l}</p><p class="g text-[17px] font-semibold num">${v}</p></div>`).join('');
+    buildReport(false);
+  }
+}
+
+/* =====================================================================
+   ACTIONS
+   ===================================================================== */
+document.addEventListener('click', e=>{
+  const el = e.target.closest('[data-act]'); if(!el) return;
+  if(el.tagName==='A') e.preventDefault();
+  const [act, a, b] = el.dataset.act.split(':');
+  const t = today();
+  switch(act){
+    case 'tab': ui.tab = a; saveUI(); render(true); window.scrollTo({top:0,behavior:'smooth'}); return;
+    case 'acc': ui.closed[a] = !ui.closed[a]; saveUI(); document.getElementById('acc-'+a).classList.toggle('closed', ui.closed[a]); return;
+    case 'set': { const k = `${t}-e${a}-s${b}`; if(state.sets[k]) delete state.sets[k]; else state.sets[k] = true; break; }
+    case 'wd': state.wdScores[a] = ((state.wdScores[a]||0)+1)%6; break;
+    case 'rate': state.rating = state.rating===+a ? 0 : +a; break;
+    case 'water': { const i = +a, at = state.water.indexOf(i); if(at>-1) state.water.splice(at,1); else state.water.push(i); break; }
+    case 'meal': state.meals[a] = !state.meals[a]; break;
+    case 'creatine': state.creatine = !state.creatine; break;
+    case 'mover': state.movers[a] = !state.movers[a]; linkMover(a); break;
+    case 'tl': state.tl[a] = !state.tl[a]; break;
+    case 'chk': state.checks[a] = !state.checks[a]; break;
+    case 'ps': state.checks['ps'+a] = !state.checks['ps'+a]; if(a==='0') state.movers.R = state.checks.ps0; if(a==='1') state.movers.S = state.checks.ps1; break;
+    case 'addClient': state.clients.push({n:'',a:''}); state.clientsAt = Date.now(); touch(); render();
+      setTimeout(()=>{ const ins = document.querySelectorAll('#pipe-list input[data-in$=".n"]'); ins[ins.length-1]?.focus(); }, 50); return;
+    case 'delClient': if(state.clients[a] && (state.clients[a].n||state.clients[a].a) && !confirm('Remove '+(state.clients[a].n||'this client')+'?')) return;
+      state.clients.splice(+a,1); state.clientsAt = Date.now(); break;
+    case 'nf': ui.noteFilter = a; saveUI(); render(); return;
+    case 'nt': ui.noteTag = a; saveUI(); render(); return;
+    case 'addNote': { const ta = $('#note-text'); if(!ta.value.trim()) return toast('Write something first');
+      addNote(ta.value.trim(), ui.noteTag); return; }
+    case 'delNote': if(!confirm('Delete this note?')) return; state.notes = state.notes.filter(n=>n.ts!==+a); state.delNotes.push(+a); break;
+    case 'fab': openSheet(); return;
+    case 'closeSheet': case 'closeSheetBg': closeSheet(); return;
+    case 'st': ui.sheetTag = a; saveUI(); paintSheetTags(); return;
+    case 'sheetSave': { const ta = $('#sheet-text'); if(!ta.value.trim()) return toast('Write something first');
+      addNote(ta.value.trim(), ui.sheetTag); ta.value=''; closeSheet(); return; }
+    case 'qWater': { const nx = WATER.findIndex((_,i)=>!state.water.includes(i)); if(nx<0) { toast('Hydration maxed — 4L done'); return; }
+      state.water.push(nx); touch(); render(); toast(`+${WATER[nx]} ml logged`); return; }
+    case 'qMeal': { const nx = MEALS.findIndex((_,i)=>!state.meals[i]); if(nx<0){ toast('All 6 meals logged'); return; }
+      state.meals[nx] = true; touch(); render(); toast(MEALS[nx][1]+' logged'); return; }
+    case 'qMover': { const nx = MOVERS.find(m=>!state.movers[m[0]]); if(!nx){ toast('MOVERS already complete'); return; }
+      state.movers[nx[0]] = true; linkMover(nx[0]); touch(); render(); toast(nx[2]+' complete'); return; }
+    case 'sync': syncNow(true); return;
+    case 'saveUrl': { const u = $('#sheets-url').value.trim();
+      if(u && !/^https:\/\/script\.google(usercontent)?\.com\//.test(u)) return toast('That doesn’t look like an Apps Script URL');
+      state.sheetsUrl = u; saveLocal(); toast(u?'URL saved — syncing…':'Sync disconnected'); paintSync(); if(u) syncNow(true); return; }
+    case 'addImp': { const ta = $('#imp-text'); if(!ta.value.trim()) return toast('Describe the idea first');
+      ui.impCat = $('#imp-cat').value; saveUI(); state.improve.push({ text:ta.value.trim(), cat:ui.impCat, ts:Date.now() }); break; }
+    case 'delImp': if(!confirm('Delete this idea?')) return; state.improve = state.improve.filter(m=>m.ts!==+a); state.delImprove.push(+a); break;
+    case 'range': ui.range = a; saveUI(); render(); return;
+    case 'csv': exportFile('csv'); return;
+    case 'txt': exportFile('txt'); return;
+    case 'resetToday': if(!confirm('Reset all of today’s workout, diet, movers, sleep and daily checklists?')) return;
+      state.lastDay = ''; const keepQ = state.queue.length; rollover(); state.queue.length = keepQ; state.lastDay = today(); touch(); render(); toast('Today reset'); return;
+    default: return;
+  }
+  touch(); render();
+});
+function linkMover(k){ if(k==='R') state.checks.ps0 = state.movers.R; if(k==='S') state.checks.ps1 = state.movers.S; }
+function addNote(text, tag){ state.notes.push({ text, tag, ts:Date.now() }); touch(); render(); toast('Note saved'); }
+
+document.addEventListener('input', e=>{
+  const el = e.target; if(!el.dataset || !el.dataset.in) return;
+  const path = el.dataset.in.split('.');
+  let o = state; for(let i=0;i<path.length-1;i++) o = o[path[i]];
+  o[path[path.length-1]] = el.value;
+  if(path[0]==='clients') state.clientsAt = Date.now();
+  if(path[0]==='sleep' && !el.value) return;
+  touch(); derive();
+});
+
+/* ---------- sheet ---------- */
+function paintSheetTags(){
+  $('#sheet-tags').innerHTML = TAGS.map(([tg,col])=>{ const on = ui.sheetTag===tg;
+    return `<button class="px-3 py-1.5 rounded-full ui press" data-act="st:${tg}" style="background:${on?col:'#1B1B20'};color:${on?'#0A0A0F':col}">${tg}</button>`; }).join('');
+}
+function openSheet(){ if(ui.tab!=='profile') ui.sheetTag = ({health:'Health',wealth:'Wealth',happy:'Happy'})[ui.tab]; paintSheetTags();
+  $('#sheet').classList.add('open'); $('#fab').classList.add('on'); setTimeout(()=>$('#sheet-text').focus(), 280); }
+function closeSheet(){ $('#sheet').classList.remove('open'); $('#fab').classList.remove('on'); }
+
+let toastT;
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 2200); }
+
+/* =====================================================================
+   GOOGLE SHEETS SYNC
+   ===================================================================== */
+function setSync(s, msg=''){ syncState = { s, msg }; paintSync(); }
+function paintSync(){
+  const s = state.sheetsUrl ? syncState.s : 'off';
+  const col = { off:'#27272A', busy:'#F59E0B', ok:'#22C55E', err:'#EF4444', idle:'#94A3B8' }[s] || '#94A3B8';
+  const hd = $('#hdr-sync'); if(hd) hd.style.background = col;
+  const dot = document.getElementById('sync-dot'); if(!dot) return;
+  dot.style.background = col; dot.style.boxShadow = s==='ok'||s==='busy' ? `0 0 8px ${col}` : 'none';
+  setTxt('sync-title', { off:'Not connected', busy:'Syncing…', ok:'Synced', err:'Sync error', idle:'Connected' }[s]);
+  setTxt('sync-msg', s==='err' ? syncState.msg : state.lastSync ? 'Last sync '+ago(state.lastSync)+(state.dirty?' • changes pending':'') : state.sheetsUrl ? 'Waiting for first sync' : 'Paste your Apps Script URL above');
+  setTxt('b-sync', { off:'Offline', busy:'…', ok:'Live', err:'Error', idle:'Ready' }[s]);
+}
+async function api(method, params, body){
+  const url = state.sheetsUrl.trim();
+  const q = params ? '?'+new URLSearchParams(params).toString() : '';
+  const r = await fetch(url+q, method==='POST'
+    ? { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(body), redirect:'follow' }
+    : { method:'GET', redirect:'follow' });
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  const j = await r.json(); if(!j.ok) throw new Error(j.error||'Server error'); return j;
+}
+async function push(){
+  const seq = editSeq;
+  await api('POST', null, {
+    action:'save', days:[...state.queue, snap(today())],
+    notes:state.notes, improvements:state.improve, delNotes:state.delNotes, delImprove:state.delImprove,
+    clients:state.clients.map((c,i)=>({ idx:i+1, name:c.n, amount:num(c.a) })), clientsAt:state.clientsAt,
+    wdScores:state.wdScores
+  });
+  state.queue = []; state.delNotes = []; state.delImprove = [];
+  if(seq===editSeq) state.dirty = false;
+}
+async function pull(from, to){
+  const j = await api('GET', { action:'get', from: from||addDays(today(),-40), to: to||today() });
+  const t = today();
+  (j.daily||[]).forEach(r=>{
+    if(r.date===t){
+      if(Number(r.updatedAt) > (state.updatedAt||0) && !state.dirty){
+        try{ applyDayState(JSON.parse(r.stateJson||'null')); }catch(e){}
+        state.updatedAt = Number(r.updatedAt);
+      }
+    } else { const { stateJson, ...lite } = r; state.history[r.date] = lite; }
+  });
+  const merge = (local, remote, dels) => { const m = new Map(local.map(x=>[x.ts,x])); (remote||[]).forEach(x=>{ if(!dels.includes(x.ts)) m.set(x.ts,x); }); return [...m.values()]; };
+  state.notes = merge(state.notes, (j.notes||[]).map(n=>({ text:n.text, tag:n.tag, ts:Number(n.ts) })), state.delNotes);
+  state.improve = merge(state.improve, (j.improvements||[]).map(n=>({ text:n.text, cat:n.cat, ts:Number(n.ts) })), state.delImprove);
+  if(j.clients && Number(j.clientsAt||0) > (state.clientsAt||0)){
+    state.clients = j.clients.map(c=>({ n:String(c.name??''), a:c.amount===''||c.amount==null?'':String(c.amount) }));
+    state.clientsAt = Number(j.clientsAt);
+  }
+  if(j.wdScores) Object.entries(j.wdScores).forEach(([d,s])=>{ s = Number(s)||0; if(s) state.wdScores[d] = s; else delete state.wdScores[d]; });
+  return j;
+}
+async function syncNow(manual, onLoad){
+  if(!state.sheetsUrl.trim()){ if(manual) toast('Add your Sheets URL in Profile → Settings'); setSync('off'); return; }
+  if(syncing) return; syncing = true; setSync('busy');
+  try{
+    if(onLoad){ await pull(); if(state.dirty || state.queue.length) await push(); }
+    else { if(state.dirty || state.queue.length || manual) await push(); await pull(); }
+    state.lastSync = Date.now(); saveLocal(); setSync('ok');
+    if(document.activeElement?.dataset?.in === undefined) render(); else derive();
+    if(manual) toast('Synced with Google Sheets');
+  }catch(err){
+    setSync('err', String(err.message||err)); if(manual) toast('Sync failed: '+(err.message||err));
+  }
+  syncing = false;
+}
+
+/* =====================================================================
+   REPORTS / EXPORT
+   ===================================================================== */
+const COLS = ['date','workoutPct','dietPct','moversPct','sleepHrs','waterMl','earning','bank','clients','deepWork','rating','wdScore','notes'];
+function rangeDates(){ const t = today(); const n = { today:0, week:6, month:29 }[ui.range]; return [addDays(t,-n), t]; }
+function collectRows(){
+  const [from,to] = rangeDates(), rows = [];
+  for(let d=from; d<=to; d=addDays(d,1)){
+    const r = d===today() ? snap(d) : state.history[d];
+    if(r) rows.push({ ...r, wdScore: state.wdScores[d]||0 });
+  }
+  return { from, to, rows };
+}
+function reportText({from,to,rows}){
+  const label = { today:'Today', week:'Last Week', month:'Last Month' }[ui.range];
+  const avg = k => rows.length ? (rows.reduce((a,r)=>a+(Number(r[k])||0),0)/rows.length) : 0;
+  const last = rows[rows.length-1] || {};
+  const notes = state.notes.filter(n=>{ const d = ymd(new Date(n.ts)); return d>=from && d<=to; }).sort((a,b)=>a.ts-b.ts);
+  const L = [];
+  L.push('RAHERISHI LIFE OS — REPORT', `${label}: ${from} → ${to}`, `Days logged: ${rows.length}`, '');
+  L.push('HEALTH (averages)',
+    `  Workout ${avg('workoutPct').toFixed(0)}%  |  Diet ${avg('dietPct').toFixed(0)}%  |  Movers ${avg('moversPct').toFixed(0)}%`,
+    `  Sleep ${avg('sleepHrs').toFixed(1)}h  |  Water ${(avg('waterMl')/1000).toFixed(1)}L  |  Rating ${avg('rating').toFixed(1)}/5`, '');
+  L.push('WEALTH (latest)',
+    `  Earning ${inr(Number(last.earning)||0)} / ${inr(TARGETS.earning)}`,
+    `  Bank ${inr(Number(last.bank)||0)} / ${inr(TARGETS.bank)}`,
+    `  Clients ${Number(last.clients)||0} / ${TARGETS.clients}  |  Deep work avg ${avg('deepWork').toFixed(1)}h / ${TARGETS.dw}h`, '');
+  L.push('DAILY LOG');
+  rows.forEach(r=>L.push(`  ${r.date}  W ${String(r.workoutPct).padStart(3)}%  D ${String(r.dietPct).padStart(3)}%  M ${String(r.moversPct).padStart(3)}%  S ${Number(r.sleepHrs).toFixed(1)}h  H2O ${(Number(r.waterMl)/1000).toFixed(1)}L  DW ${Number(r.deepWork)||0}h  R ${r.rating||0}  Score ${r.wdScore||0}`));
+  if(!rows.length) L.push('  (no days in range yet)');
+  L.push('', `NOTES (${notes.length})`);
+  notes.forEach(n=>{ const d = new Date(n.ts); L.push(`  [${n.tag}] ${ymd(d)} ${pad(d.getHours())}:${pad(d.getMinutes())} — ${n.text.replace(/\n/g,' ')}`); });
+  L.push('', `Generated ${new Date().toLocaleString('en-IN')}`);
+  return L.join('\n');
+}
+async function buildReport(fetchRemote){
+  if(fetchRemote && state.sheetsUrl){
+    const [from,to] = rangeDates();
+    try{ await pull(from,to); saveLocal(); }catch(e){ toast('Using local data — Sheets unreachable'); }
+  }
+  const data = collectRows();
+  const pre = document.getElementById('report'); if(pre) pre.textContent = reportText(data);
+  return data;
+}
+async function exportFile(kind){
+  toast(state.sheetsUrl ? 'Fetching full history…' : 'Building report…');
+  const data = await buildReport(true);
+  let content, mime;
+  if(kind==='csv'){
+    const q = v => { const s = String(v??''); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
+    content = [COLS.join(','), ...data.rows.map(r=>COLS.map(c=>q(r[c])).join(','))].join('\n');
+    mime = 'text/csv;charset=utf-8';
+  } else { content = reportText(data); mime = 'text/plain;charset=utf-8'; }
+  const blob = new Blob([content], { type:mime }), url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `lifeos-${ui.range}-${today()}.${kind}`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 1500);
+  toast(kind.toUpperCase()+' downloaded');
+}
+
+/* =====================================================================
+   BOOT
+   ===================================================================== */
+rollover();
+render(true);
+syncNow(false, true);
+setInterval(()=>{ if(rollover()) render(); if(state.sheetsUrl && (state.dirty || state.queue.length || Date.now()-state.lastSync>120000)) syncNow(false); else paintSync(); }, 30000);
+if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState==='visible'){ if(rollover()) render(); syncNow(false); }
+  else if(state.sheetsUrl && state.dirty) syncNow(false);
+});
+</script>
+</body>
+</html>
