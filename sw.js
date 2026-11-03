@@ -1,6 +1,6 @@
 /* Life OS offline cache: app shell first, network updates in background. */
-const CACHE = 'lifeos-v3-1';
-const SHELL = ['./', './index.html', './manifest.json', './icons/apple-touch-icon.png', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-32.png',
+const CACHE = 'lifeos-v3-2';
+const SHELL = ['./', './index.html', './manifest.json', './apple-touch-icon.png', './icon-192.png', './icon-512.png', './icon-32.png',
   'https://cdn.tailwindcss.com/3.4.17'];
 
 self.addEventListener('install', e => {
