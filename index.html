@@ -230,6 +230,7 @@ const KEEP_DAYS = 150;
 const SCORE = ['#27272A','#EF4444','#F97316','#F59E0B','#84CC16','#22C55E'];
 const SETC = ['#27272A','#F97316','#FACC15','#22C55E'];   // colour for 0,1,2,3 sets done
 const ZONE = { health:'#22C55E', wealth:'#F59E0B', happy:'#818CF8', journal:'#38BDF8', profile:'#94A3B8' };
+const APP_VER = '4.4';
 const DAY_SPLIT = ['rest','chest','back','shoulder','legs','chest','back']; // Sun..Sat
 const OLD_WATER = [250,250,500,500,500,500,750,750];
 const MOVERS = [['M','Med','Meditation','lotus'],['O','Oxy','Breathwork','wind'],['V','Viz','Visualize','eye'],['R','Read','10 pages','book'],['S','Scribe','Journal','pen']];
@@ -1282,7 +1283,8 @@ function vProfile(){
     <div class="flex items-center gap-2">${ic('db','',`color:${N}`)}<h3 class="g text-[17px] font-semibold">Storage</h3></div>
     <div class="grid grid-cols-2 gap-2 sm" id="storage"></div>
     <button class="w-full py-3 rounded-xl lbl flex items-center justify-center gap-1.5 press" style="background:#EF44441A;color:#EF4444;border:1px solid #EF444440" data-act="resetDay">${ic('reset','','width:15px;height:15px')} Clear today's data</button>
-  </section>`;
+  </section>
+  <p class="ui mut text-center pb-2">App version ${APP_VER}</p>`;
 }
 
 /* =====================================================================
@@ -1634,7 +1636,12 @@ setInterval(()=>{
   if(rollover()){ if(typing()) pendingRender = true; else render(); }
   if(state.sheetsUrl && (isDirty() || Date.now()-state.lastSync>120000)) syncNow(false); else paintSync();
 }, 30000);
-if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator && location.protocol==='https:'){
+  navigator.serviceWorker.register('sw.js', { updateViaCache:'none' }).then(reg=>{
+    reg.update().catch(()=>{});
+    document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') reg.update().catch(()=>{}); });
+  }).catch(()=>{});
+}
 document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState==='visible'){ if(rollover()) render(); syncNow(false); }
   else if(state.sheetsUrl && isDirty()) syncNow(false);
