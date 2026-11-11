@@ -230,7 +230,7 @@ const KEEP_DAYS = 150;
 const SCORE = ['#27272A','#EF4444','#F97316','#F59E0B','#84CC16','#22C55E'];
 const SETC = ['#27272A','#F97316','#FACC15','#22C55E'];   // colour for 0,1,2,3 sets done
 const ZONE = { health:'#22C55E', wealth:'#F59E0B', happy:'#818CF8', journal:'#38BDF8', profile:'#94A3B8' };
-const APP_VER = '4.4';
+const APP_VER = '4.6';
 const DAY_SPLIT = ['rest','chest','back','shoulder','legs','chest','back']; // Sun..Sat
 const OLD_WATER = [250,250,500,500,500,500,750,750];
 const MOVERS = [['M','Med','Meditation','lotus'],['O','Oxy','Breathwork','wind'],['V','Viz','Visualize','eye'],['R','Read','10 pages','book'],['S','Scribe','Journal','pen']];
@@ -406,7 +406,7 @@ function woStats(date){
   else if(wo.warm || setsD>0){ score=1; why='Showed up — light session'; }
   else { score=0; why='No workout logged yet'; }
   if(rest && score===0){ score=null; why='Rest day'; }
-  if(!d.wo && !rest && state.wdScores[date]!=null) { score = state.wdScores[date]; why = 'Score from earlier version'; }
+  if(score===0 && !home && !rest && (d.at||0)<=1 && state.wdScores[date]!=null) { score = state.wdScores[date]; why = 'Score from earlier version'; }
   return { n, setsT, setsD, repsD, target, full, any, score, why, rest, pct: target ? Math.round(repsD/target*100) : 0, key };
 }
 function sleepHrs(date){
@@ -414,6 +414,7 @@ function sleepHrs(date){
   if(!prev || !wake) return null;
   let m = mins(wake) - mins(prev); if(m<=0) m += 1440; return Math.round(m/6)/10;
 }
+const mealChip = st => st.k==='pending' ? ['Pending','#64748B'] : st.k==='late' ? ['Late '+hm2(st.diff),'#F97316'] : st.k==='early' ? ['Early '+hm2(st.diff),'#38BDF8'] : ['On time','#22C55E'];
 function mealStat(date, i){
   const m = peek(date).meals[i], ideal = cfg.meals[i]?.t;
   if(!m || !m.d) return { k:'pending' };
@@ -653,16 +654,16 @@ function vHealth(){
       ${ic('drop','fill',`width:${size}px;height:${size}px;color:#38BDF8`)}<span class="w-px h-6" style="background:rgba(255,255,255,.15)"></span><span class="g text-[16px] font-bold whitespace-nowrap">${label}</span></button>`;
   const drinks = d.water.map((w,k)=>`<button class="px-2 py-1 rounded-lg ui flex items-center gap-1 press" style="background:#0E2233;color:#7DD3FC" data-act="unwater:${k}" aria-label="Remove this drink">${num(w.ml)}ml${w.t?` • ${t12(w.t)}`:''} ${ic('x','','width:11px;height:11px')}</button>`).join('');
   const meals = cfg.meals.map((m,i)=>{ const r = d.meals[i]||{}, st = mealStat(date,i);
-    const chip = st.k==='pending' ? ['Pending','#64748B'] : st.k==='late' ? ['Late '+hm2(st.diff),'#F97316'] : st.k==='early' ? ['Early '+hm2(st.diff),'#38BDF8'] : ['On time','#22C55E'];
+    const chip = mealChip(st);
     return `<div class="sub p-2.5 space-y-1.5">
       <div class="flex items-center gap-2.5">
         <button class="press" data-act="meal:${i}" aria-label="Toggle ${esc(m.n)}">${tick(r.d,G)}</button>
         <div class="flex-1 min-w-0"><span class="g text-[13px] font-semibold block truncate">${esc(m.n)}</span><span class="ui mut num">Ideal ${t12(m.t)}</span></div>
-        <span class="chip shrink-0" style="color:${chip[1]};background:${chip[1]}1A">${chip[0]}</span>
+        <span class="chip shrink-0" id="mchip-${i}" style="color:${chip[1]};background:${chip[1]}1A">${chip[0]}</span>
       </div>
       <div class="flex items-center gap-2 pl-[32px]">
         <span class="ui sec shrink-0">Ate at</span>
-        <input type="time" class="cell w-[108px] num" data-in="d.meals.${i}.at" value="${esc(r.at||'')}">
+        <input type="time" class="cell w-[108px] num" data-in="d.meals.${i}.at" data-def="${esc(m.t)}" value="${esc(r.at||'')}">
         <input class="cell flex-1 text-left" data-in="d.meals.${i}.q" value="${esc(r.q||'')}" placeholder="Qty (2 roti, 150g)">
       </div>
       <input class="bare ui sec block pl-[32px]" data-in="d.meals.${i}.f" value="${esc(r.f||'')}" placeholder="What did you eat?">
@@ -738,18 +739,18 @@ function vHealth(){
     <div class="grid grid-cols-2 gap-2">
       <label class="sub p-3 space-y-1 block">
         <span class="ui sec flex items-center justify-between">1 • Woke up ${ic('sun','','width:15px;height:15px;color:#F59E0B')}</span>
-        <input type="time" class="bare g text-[18px] font-semibold num" data-in="d.sleep.wake" value="${esc(d.sleep.wake)}">
+        <input type="time" class="bare g text-[18px] font-semibold num" data-in="d.sleep.wake" data-def="${esc(cfg.goals.wake)}" value="${esc(d.sleep.wake)}">
         <span class="lbl block" style="font-size:10px" id="wake-ok"></span>
       </label>
       <label class="sub p-3 space-y-1 block">
         <span class="ui sec flex items-center justify-between">2 • Sleep tonight ${ic('moon','','width:15px;height:15px;color:#818CF8')}</span>
-        <input type="time" class="bare g text-[18px] font-semibold num" data-in="d.sleep.slept" value="${esc(d.sleep.slept)}">
+        <input type="time" class="bare g text-[18px] font-semibold num" data-in="d.sleep.slept" data-def="${esc(cfg.goals.sleep)}" value="${esc(d.sleep.slept)}">
         <span class="lbl block" style="font-size:10px" id="sleep-ok"></span>
       </label>
     </div>
     <div class="deep p-3 flex items-center justify-between gap-2">
       <div class="min-w-0"><p class="ui sec">Slept last night (${fmtD(prevDate,{weekday:'short',day:'numeric'})})</p>
-        <input type="time" class="bare g text-[15px] font-semibold num" data-in="prev.sleep.slept" value="${esc(prev?.sleep?.slept||'')}"></div>
+        <input type="time" class="bare g text-[15px] font-semibold num" data-in="prev.sleep.slept" data-def="${esc(cfg.goals.sleep)}" value="${esc(prev?.sleep?.slept||'')}"></div>
       <div class="text-right shrink-0"><p class="g text-[22px] font-bold num" id="sleep-hrs">—</p><p class="text-[9px] sec font-semibold tracking-wider">HOURS SLEPT</p></div>
     </div>
     <div class="sub p-3">
@@ -1055,9 +1056,11 @@ function challengeStats(){
 }
 function vJournal(){
   const J = '#38BDF8', date = ui.date, d = day(date), h = habits(date), c = cfg.challenge, cs = challengeStats(), len = cs.len;
+  const missed = Array.from({length:len},(_,i)=>addDays(c.start,i)).filter(ds=>ds<today() && !logged(ds)).reverse();
   const grid = Array.from({length:len},(_,i)=>{ const ds = addDays(c.start,i), fut = ds>today(), isV = ds===date;
     let col = '#1F1F25';
     if(fut) col = '#141418';
+    else if(!logged(ds) && ds<today()) col = '#EF444426;outline:1px dashed #EF444499;outline-offset:-1px';
     else if(logged(ds)){ const hh = habits(ds), r = hh.done/hh.total; col = r>=1?'#22C55E':r>=.83?'#84CC16':r>=.66?'#F59E0B':r>=.5?'#F97316':'#EF4444'; }
     return `<button class="aspect-square rounded-[5px] press" ${fut?'disabled':''} data-act="goDate:${ds}" aria-label="${ds}" style="background:${col};${isV?'box-shadow:0 0 0 2px #F8FAFC':''}"></button>`; }).join('');
   const bar = (label,p,col,icon) => `<div class="space-y-1">
@@ -1114,14 +1117,18 @@ function vJournal(){
       ${bar('Clarity on finances', cs.finance, '#F59E0B', 'wallet')}
     </div>
     <div class="grid gap-1 pt-1" style="grid-template-columns:repeat(15,minmax(0,1fr))">${grid}</div>
-    <p class="ui mut">One square per day, coloured by how many of the 6 habits you hit. Tap a square to open that day.</p>
+    <p class="ui mut">One square per day, coloured by how many of the 6 habits you hit. Dashed red = nothing logged. Tap a square to open that day.</p>
+    ${missed.length?`<div class="deep p-3 space-y-2">
+      <div class="flex items-center justify-between"><span class="sm font-semibold" style="color:#EF4444">Missed days • ${missed.length}</span><span class="ui mut">Tap to fill in</span></div>
+      <div class="flex flex-wrap gap-1.5">${missed.map(ds=>`<button class="px-2 py-1 rounded-lg ui font-semibold num press" data-act="goDate:${ds}" style="background:#EF44441A;color:#FCA5A5">${fmtD(ds,{day:'numeric',month:'short'})}</button>`).join('')}</div>
+    </div>`:`<div class="deep p-3 ui" style="color:#22C55E">No missed days — every day so far has an entry.</div>`}
   </section>
 
   <section class="glass p-4">
     <div class="flex items-center justify-between pb-1"><div class="flex items-center gap-2">${ic('journal','',`color:${J}`)}<h3 class="g text-[18px] font-semibold">Daily Journal</h3></div>
       <span class="chip num" style="color:${J};background:${J}1A">${h.done}/${h.total} habits</span></div>
-    ${line(1,'Wake-up time',`<input type="time" class="cell w-[100px] num" data-in="d.sleep.wake" value="${esc(d.sleep.wake)}">`)}
-    ${line(2,'Sleep time',`<input type="time" class="cell w-[100px] num" data-in="d.sleep.slept" value="${esc(d.sleep.slept)}">`)}
+    ${line(1,'Wake-up time',`<input type="time" class="cell w-[100px] num" data-in="d.sleep.wake" data-def="${esc(cfg.goals.wake)}" value="${esc(d.sleep.wake)}">`)}
+    ${line(2,'Sleep time',`<input type="time" class="cell w-[100px] num" data-in="d.sleep.slept" data-def="${esc(cfg.goals.sleep)}" value="${esc(d.sleep.slept)}">`)}
     ${line(3,'How long I slept',`<span class="g text-[15px] font-bold num">${h.hrs!=null?h.hrs+' h':'—'}</span>`)}
     ${line(4,'Steps walked',`<input class="cell w-[100px] num" inputmode="numeric" data-in="d.j.steps" value="${esc(d.j.steps)}" placeholder="0">`)}
     <div class="py-2 space-y-1.5" style="border-bottom:1px solid rgba(255,255,255,.05)"><span class="sm"><span class="mut num mr-1.5">5</span>Rate the day</span><div class="flex gap-1.5">${rate}</div></div>
@@ -1374,7 +1381,7 @@ document.addEventListener('click', e=>{
       day(date).water.push({ ml:v, t:isToday?nowHM():'' }); ui.custom = false; markDay(); render(); toast(`+${v} ml`); return; }
     case 'creatine': { const d = day(date); d.cre = !d.cre; d.creT = d.cre && isToday ? nowHM() : ''; markDay(); render(); return; }
     case 'meal': { const d = day(date), m = d.meals[a] = d.meals[a]||{ d:false, at:'', q:'', f:'' }; m.d = !m.d;
-      if(m.d && !m.at) m.at = isToday ? nowHM() : cfg.meals[+a].t; markDay(); render(); return; }
+      if(m.d && !m.at) m.at = cfg.meals[+a].t; markDay(); render(); return; }
     case 'protein': day(date).protein = !day(date).protein; markDay(); render(); return;
     case 'mover': { const d = day(date); d.mv[a] = !d.mv[a]; linkMover(d,a); markDay(); render(); return; }
     case 'tl': day(date).tl[a] = !day(date).tl[a]; markDay(); render(); return;
@@ -1408,7 +1415,7 @@ document.addEventListener('click', e=>{
       else addNote(v, ui.sheetTag);
       ta.value = ''; ui.drafts.sheet = ''; saveUI(); closeSheet(); render(); return; }
     case 'qMeal': { const d = day(date), nx = cfg.meals.findIndex((_,i)=>!d.meals[i]?.d); if(nx<0){ toast('All meals logged'); return; }
-      d.meals[nx] = { q:'', f:'', ...(d.meals[nx]||{}), d:true, at: isToday?nowHM():cfg.meals[nx].t }; markDay(); render(); toast(cfg.meals[nx].n+' logged at '+t12(d.meals[nx].at)); return; }
+      d.meals[nx] = { q:'', f:'', ...(d.meals[nx]||{}), d:true, at: d.meals[nx]?.at || cfg.meals[nx].t }; markDay(); render(); toast(cfg.meals[nx].n+' logged at '+t12(d.meals[nx].at)); return; }
     case 'qMover': { const d = day(date), nx = MOVERS.find(m=>!d.mv[m[0]]); if(!nx){ toast('MOVERS already complete'); return; }
       d.mv[nx[0]] = true; linkMover(d,nx[0]); markDay(); render(); toast(nx[2]+' complete'); return; }
     case 'sync': syncNow(true); return;
@@ -1445,12 +1452,16 @@ document.addEventListener('input', e=>{
   else { root = state; kind = 'misc'; path.unshift(head); }
   let o = root; for(let i=0;i<path.length-1;i++){ if(o[path[i]]==null) o[path[i]] = {}; o = o[path[i]]; }
   o[path[path.length-1]] = el.value;
-  if(kind==='d' && path[0]==='meals'){ const m = root.meals[path[1]]; if(m.d===undefined) m.d = false; if(path[2]==='at' && el.value) m.d = true; }
+  if(kind==='d' && path[0]==='meals'){ const m = root.meals[path[1]]; if(m.d===undefined) m.d = false; if(path[2]==='at' && el.value) m.d = true;
+    const ch = $('#mchip-'+path[1]); if(ch){ const c = mealChip(mealStat(ui.date,+path[1])); ch.textContent = c[0]; ch.style.color = c[1]; ch.style.background = c[1]+'1A'; } }
   if(kind==='d' && path[0]==='wo' && path[2]==='n'){ const sp = cfg.splits[root.wo.split]; if(sp?.ex[+path[1]]){ sp.ex[+path[1]].n = el.value; markCfg(); } }
   if(path[0]==='clients') state.clientsAt = Date.now();
   if(kind==='d') markDay(); else if(kind==='prev') markDay(addDays(ui.date,-1)); else if(kind==='cfg') markCfg(); else markMisc();
   derive();
 });
+// empty time field -> open the picker at the plan time (not the phone's current time); saved when the field closes
+document.addEventListener('focusin', e=>{ const el = e.target; if(el.type==='time' && el.dataset?.def && !el.value){ el.value = el.dataset.def; el.dataset.pre = '1'; } });
+document.addEventListener('focusout', e=>{ const el = e.target; if(el?.dataset?.pre){ delete el.dataset.pre; if(el.value) el.dispatchEvent(new Event('input', { bubbles:true })); } }, true);
 document.addEventListener('focusout', ()=>{ setTimeout(()=>{ if(pendingRender && !typing() && !$('#sheet').classList.contains('open')) render(); }, 80); });
 function restoreDrafts(){ document.querySelectorAll('[data-draft]').forEach(el=>{ const v = ui.drafts[el.dataset.draft]; if(v && !el.value) el.value = v; }); }
 
@@ -1478,7 +1489,7 @@ function snap(date){
   if(date===today()){ payload.cfg = cfg; payload.cfgAt = state.cfgAt; }
   return { date, workoutPct:w.pct, dietPct:dt.pct, moversPct:moverCount(date)*20, sleepHrs:h.hrs??'', waterMl:dt.water,
     earning:num(cfg.kpi.earning), bank:num(cfg.kpi.bank), clients:num(cfg.kpi.clients), deepWork:num(d.dw),
-    rating:w.score??'', notes:dayNotes.join(' | '), wdScores:JSON.stringify(state.wdScores), updatedAt:d.at||Date.now(),
+    rating:w.score??'', notes:dayNotes.join(' | '), wdScores:JSON.stringify(state.wdScores), updatedAt:d.at||0,
     stateJson:JSON.stringify(payload) };
 }
 function setSync(s, msg=''){ syncState = { s, msg }; paintSync(); }

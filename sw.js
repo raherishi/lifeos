@@ -1,7 +1,7 @@
 /* Life OS offline cache.
    The app page (index.html) is network-first, so a new upload shows on the next open when online;
    the cached copy is used only offline. Icons / Tailwind are cache-first. */
-const CACHE = 'lifeos-v4-4';
+const CACHE = 'lifeos-v4-6';
 const SHELL = ['./', './index.html', './manifest.json', './apple-touch-icon.png', './icon-192.png', './icon-512.png', './icon-32.png',
   'https://cdn.tailwindcss.com/3.4.17'];
 
