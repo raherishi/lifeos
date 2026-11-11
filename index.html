@@ -18,16 +18,14 @@
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <script>
 tailwind.config = { theme: { extend: {
-  colors: { void:'#0A0A0F', health:'#22C55E', wealth:'#F59E0B', happy:'#818CF8', neutral:'#94A3B8', ink:'#F8FAFC', muted:'#64748B' },
   fontFamily: { grotesk:['"Space Grotesk"','sans-serif'], inter:['Inter','sans-serif'] }
 } } };
 </script>
 <style>
   :root{
-    --void:#0A0A0F; --glass:rgba(28,28,38,.85); --stroke:rgba(255,255,255,.08); --hi:rgba(255,255,255,.15);
-    --ink:#F8FAFC; --sec:#94A3B8; --mut:#64748B; --line:#27272A;
-    --health:#22C55E; --wealth:#F59E0B; --happy:#818CF8; --neutral:#94A3B8;
-    --z:var(--health);
+    --void:#0A0A0F; --glass:rgba(28,28,38,.85); --stroke:rgba(255,255,255,.08);
+    --ink:#F8FAFC; --sec:#94A3B8; --mut:#64748B;
+    --z:#22C55E;
   }
   html,body{margin:0;padding:0;background:var(--void);color:var(--ink);font-family:Inter,sans-serif;-webkit-tap-highlight-color:transparent}
   body{min-height:100dvh;overscroll-behavior:none;font-size:15px;line-height:22px}
@@ -49,11 +47,12 @@ tailwind.config = { theme: { extend: {
   .deep{background:rgba(10,10,15,.7);border:1px solid rgba(255,255,255,.05);border-radius:14px}
   .well{background:var(--void);border:1px solid var(--stroke);border-radius:12px;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
   .well:focus{border-color:#818CF8;box-shadow:0 0 0 4px rgba(129,140,248,.15)}
-  .well::placeholder{color:#475569}
+  .well::placeholder,.bare::placeholder,.cell::placeholder{color:#475569}
   .bare{background:transparent;border:0;outline:none;color:inherit;width:100%;min-width:0}
-  .bare::placeholder{color:#475569}
   .bare:focus{box-shadow:0 1px 0 0 #818CF8}
-  input[type=time]{color-scheme:dark}
+  .cell{background:#0A0A0F;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:var(--ink);outline:none;padding:4px 6px;min-width:0;text-align:center;font-size:14px}
+  .cell:focus{border-color:#818CF8}
+  input[type=time],input[type=date]{color-scheme:dark}
   input[type=time]::-webkit-calendar-picker-indicator{opacity:.45;margin-left:2px}
   .ico{width:20px;height:20px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
   .ico.fill{fill:currentColor}
@@ -75,16 +74,19 @@ tailwind.config = { theme: { extend: {
   .sheet-wrap{position:fixed;inset:0;z-index:60;background:rgba(10,10,15,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
     display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
   .sheet-wrap.open{opacity:1;pointer-events:auto}
-  .sheet{transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);border-radius:24px 24px 0 0;width:100%;max-width:480px}
+  .sheet{transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:88dvh;overflow-y:auto}
   .sheet-wrap.open .sheet{transform:none}
   .fab{transition:transform .25s ease, box-shadow .3s}
   .fab.on{transform:rotate(45deg)}
   .toast{position:fixed;left:50%;top:calc(88px + env(safe-area-inset-top));transform:translate(-50%,-12px);opacity:0;z-index:80;transition:all .25s;pointer-events:none}
   .toast.show{opacity:1;transform:translate(-50%,0)}
   textarea{resize:none}
-  .dock a.on .dot{opacity:1}
   .pt-safe{padding-top:env(safe-area-inset-top)}
   .pb-safe{padding-bottom:env(safe-area-inset-bottom)}
+  .wave{animation:wave 3.2s linear infinite}
+  @keyframes wave{from{transform:translateX(0)}to{transform:translateX(84px)}}
+  .bub{animation:bub 4s ease-in infinite;opacity:0}
+  @keyframes bub{0%{transform:translateY(0);opacity:0}15%{opacity:.7}100%{transform:translateY(-120px);opacity:0}}
 </style>
 </head>
 <body>
@@ -95,14 +97,15 @@ tailwind.config = { theme: { extend: {
     <symbol id="i-dumbbell" viewBox="0 0 24 24"><path d="M6 7v10M18 7v10M3 9.5v5M21 9.5v5M6 12h12"/></symbol>
     <symbol id="i-wallet" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="14" rx="3"/><path d="M2.5 10.5h19M16 15h2"/><path d="M6 6l9-3 1.5 3"/></symbol>
     <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/></symbol>
-    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+    <symbol id="i-chevl" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+    <symbol id="i-chevr" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+    <symbol id="i-chevd" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
     <symbol id="i-checkc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol>
     <symbol id="i-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></symbol>
     <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3s6 6.4 6 11a6 6 0 0 1-12 0c0-4.6 6-11 6-11z"/></symbol>
-    <symbol id="i-pill" viewBox="0 0 24 24"><path d="M10.5 20.5a5 5 0 0 1-7-7l6-6a5 5 0 0 1 7 7z"/><path d="M8.5 8.5l7 7"/></symbol>
     <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol>
     <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
     <symbol id="i-food" viewBox="0 0 24 24"><path d="M7 3v8M4.5 3v5a2.5 2.5 0 0 0 5 0V3M7 11v10M17.5 3C15.5 3 14 5 14 8.5V13h3.5v8"/></symbol>
@@ -111,13 +114,9 @@ tailwind.config = { theme: { extend: {
     <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
     <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 0 1 2-2h14v14H6a2 2 0 0 0-2 2zm0 0a2 2 0 0 0 2 2h14v-4"/></symbol>
     <symbol id="i-pen" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
-    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
     <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol>
-    <symbol id="i-bank" viewBox="0 0 24 24"><path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18"/></symbol>
-    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14a6 6 0 0 1 3.5 6"/></symbol>
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></symbol>
     <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
-    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h12l-2.5 4L17 12H5"/></symbol>
     <symbol id="i-brief" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></symbol>
     <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 3v18M17 3v18M3 7.5h4M3 16.5h4M17 7.5h4M17 16.5h4M3 12h18"/></symbol>
     <symbol id="i-clap" viewBox="0 0 24 24"><path d="M3 10h18v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 10l1-4.5 15.5-3 1 4.5L3 10zM8 5l2.5 4M13.5 4l2.5 4"/></symbol>
@@ -129,21 +128,25 @@ tailwind.config = { theme: { extend: {
     <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
     <symbol id="i-sync" viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-14 5.3M4 12a8 8 0 0 1 14-5.3"/><path d="M18 3v4h-4M6 21v-4h4"/></symbol>
-    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 19a5 5 0 1 1 .9-9.9A6 6 0 0 1 19.5 11 4 4 0 0 1 18 19z"/></symbol>
     <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13M9 7V4h6v3"/></symbol>
     <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol>
     <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></symbol>
-    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
-    <symbol id="i-list" viewBox="0 0 24 24"><circle cx="5" cy="6" r="1.5"/><circle cx="5" cy="12" r="1.5"/><circle cx="5" cy="18" r="1.5"/><path d="M10 6h10M10 12h10M10 18h10"/></symbol>
-    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
     <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
     <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
-    <symbol id="i-logo" viewBox="0 0 32 32"><rect x="1" y="1" width="30" height="30" rx="9" fill="#13131A" stroke="rgba(255,255,255,.15)"/><path d="M10 23V9h6.5a4.5 4.5 0 0 1 0 9H10m6 0l5.5 5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-journal" viewBox="0 0 24 24"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></symbol>
+    <symbol id="i-scale" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 10a5 5 0 0 1 8 0M12 10l1.6-2.2"/></symbol>
+    <symbol id="i-scissor" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V11M10 20V4M16 20v-7M2 20h20"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 22c4 0 7-2.7 7-6.5 0-4.5-4-6.5-4.5-10.5-2.5 1.5-4 4-4 6.5C9 10 8 9 8 7.5 6 9 5 11.5 5 15.5 5 19.3 8 22 12 22z"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 9.5V20h14V9.5"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h0"/></symbol>
   </defs>
 </svg>
 
-<div class="ambient" id="ambient"></div>
+<div class="ambient"></div>
 
 <!-- ============ HEADER ============ -->
 <header class="fixed top-0 inset-x-0 z-50 pt-safe" style="background:rgba(10,10,15,.78);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,.05)">
@@ -162,7 +165,7 @@ tailwind.config = { theme: { extend: {
       <div class="lbl px-2.5 py-1 rounded-full flex items-center gap-1.5" style="background:rgba(255,255,255,.06)">
         <span class="w-1.5 h-1.5 rounded-full" style="background:var(--z)"></span><span id="hdr-date" class="num">—</span>
       </div>
-      <button class="relative w-10 h-10 rounded-full flex items-center justify-center press" data-act="tab:profile" aria-label="Profile"
+      <button class="relative w-10 h-10 rounded-full flex items-center justify-center press" data-act="tab:profile" aria-label="Profile and settings"
         style="background:linear-gradient(140deg,#818CF8,#22C55E 55%,#F59E0B)">
         <span class="w-[36px] h-[36px] rounded-full flex items-center justify-center g font-bold" style="background:#13131A">R</span>
         <span id="hdr-sync" class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2" style="border-color:#0A0A0F;background:#27272A"></span>
@@ -173,13 +176,13 @@ tailwind.config = { theme: { extend: {
 
 <!-- ============ MAIN ============ -->
 <main class="relative z-10 w-full max-w-[520px] mx-auto px-4 pb-36" style="padding-top:calc(84px + env(safe-area-inset-top))">
-  <!-- Zone switcher rail -->
-  <div class="w-full p-1.5 rounded-full flex items-center justify-between mb-4" style="background:#0E0E13;border:1px solid rgba(255,255,255,.05)" id="rail"></div>
+  <div class="w-full p-1.5 rounded-full flex items-center justify-between mb-3" style="background:#0E0E13;border:1px solid rgba(255,255,255,.05)" id="rail"></div>
+  <div id="datebar" class="mb-4"></div>
   <div id="view"></div>
 </main>
 
 <!-- ============ FAB + DOCK ============ -->
-<nav class="dock fixed bottom-0 left-0 right-0 z-40 pb-safe pointer-events-none">
+<nav class="fixed bottom-0 left-0 right-0 z-40 pb-safe pointer-events-none">
   <div class="max-w-[520px] mx-auto px-4 pb-4 flex items-center gap-3">
     <div class="flex-1 h-16 rounded-full flex items-center justify-around px-2 pointer-events-auto"
       style="background:rgba(31,31,37,.82);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.08);box-shadow:0 4px 24px rgba(0,0,0,.35)" id="dock"></div>
@@ -191,22 +194,22 @@ tailwind.config = { theme: { extend: {
 </nav>
 
 <!-- ============ QUICK CAPTURE SHEET ============ -->
-<div class="sheet-wrap" id="sheet" data-act="closeSheetBg">
-  <div class="sheet glass p-5 pb-8 space-y-4" style="border-radius:24px 24px 0 0" onclick="event.stopPropagation()">
+<div class="sheet-wrap" id="sheet">
+  <div class="sheet glass p-5 pb-8 space-y-4">
     <div class="w-12 h-1 rounded-full mx-auto" style="background:#35343a"></div>
     <div class="flex items-center justify-between">
       <div>
         <h3 class="g text-[17px] font-semibold">Quick Capture</h3>
-        <p class="ui sec">Note, water, meals — one tap</p>
+        <p class="ui sec">Idea, journal, note — one tap</p>
       </div>
-      <button class="w-9 h-9 rounded-full flex items-center justify-center press" style="background:#35343a" data-act="closeSheet" aria-label="Close"><svg class="ico" style="width:18px;height:18px"><use href="#i-x"/></svg></button>
+      <button class="w-10 h-10 rounded-full flex items-center justify-center press" style="background:#35343a" data-act="closeSheet" aria-label="Close"><svg class="ico" style="width:18px;height:18px"><use href="#i-x"/></svg></button>
     </div>
-    <textarea id="sheet-text" rows="3" class="well p-3 sm" placeholder="What's on your mind?"></textarea>
     <div class="flex gap-2 flex-wrap" id="sheet-tags"></div>
-    <button class="w-full py-3 rounded-xl g font-semibold press" style="background:var(--z);color:#0A0A0F" data-act="sheetSave">Save note</button>
+    <textarea id="sheet-text" data-draft="sheet" rows="4" class="well p-3 sm" placeholder="What's on your mind?"></textarea>
+    <button class="w-full py-3 rounded-xl g font-semibold press" style="background:var(--z);color:#0A0A0F" data-act="sheetSave" id="sheet-save">Save note</button>
     <div class="grid grid-cols-2 gap-2">
-      <button class="sub p-3 flex items-center gap-2.5 text-left press" data-act="qWater"><svg class="ico" style="color:#22C55E"><use href="#i-drop"/></svg><div><span class="sm font-semibold block">Next water</span><span class="ui sec">Fill next unit</span></div></button>
-      <button class="sub p-3 flex items-center gap-2.5 text-left press" data-act="qMeal"><svg class="ico" style="color:#22C55E"><use href="#i-food"/></svg><div><span class="sm font-semibold block">Tick next meal</span><span class="ui sec">Mark as logged</span></div></button>
+      <button class="sub p-3 flex items-center gap-2.5 text-left press" data-act="water:250"><svg class="ico" style="color:#38BDF8"><use href="#i-drop"/></svg><div><span class="sm font-semibold block">+250 ml water</span><span class="ui sec">Add to the jar</span></div></button>
+      <button class="sub p-3 flex items-center gap-2.5 text-left press" data-act="qMeal"><svg class="ico" style="color:#22C55E"><use href="#i-food"/></svg><div><span class="sm font-semibold block">Ate just now</span><span class="ui sec">Logs next meal + time</span></div></button>
       <button class="sub p-3 flex items-center gap-2.5 text-left press" data-act="qMover"><svg class="ico" style="color:#818CF8"><use href="#i-lotus"/></svg><div><span class="sm font-semibold block">Next MOVER</span><span class="ui sec">Complete ritual step</span></div></button>
       <button class="sub p-3 flex items-center gap-2.5 text-left press" data-act="sync"><svg class="ico" style="color:#F59E0B"><use href="#i-sync"/></svg><div><span class="sm font-semibold block">Sync now</span><span class="ui sec">Push to Sheets</span></div></button>
     </div>
@@ -217,46 +220,41 @@ tailwind.config = { theme: { extend: {
 
 <script>
 /* =====================================================================
-   RAHERISHI LIFE OS v3 — single-file PWA
-   localStorage cache (rishi-lifeos-v3) + Google Sheets sync (code.gs)
+   RAHERISHI LIFE OS v4 — single-file PWA
+   Per-day records (edit any past day) in localStorage (rishi-lifeos-v4)
+   + Google Sheets sync through code.gs (same API as v3, no redeploy).
    ===================================================================== */
-const KEY = 'rishi-lifeos-v3';
-const UIKEY = 'rishi-lifeos-ui';
+const KEY = 'rishi-lifeos-v4', OLDKEY = 'rishi-lifeos-v3', UIKEY = 'rishi-lifeos-ui4';
 const CB_START = '2026-10-28';
-const TARGETS = { earning:100000, bank:150000, clients:35, dw:5 };
+const KEEP_DAYS = 150;
 const SCORE = ['#27272A','#EF4444','#F97316','#F59E0B','#84CC16','#22C55E'];
-const ZONE = { health:'#22C55E', wealth:'#F59E0B', happy:'#818CF8', profile:'#94A3B8' };
-
-const SPLITS = {
-  chest:{ name:'Chest + Triceps', tag:'Push Day', list:[['Flat Bench Press','4 × 8'],['Incline DB Press','3 × 10'],['Cable Flyes','3 × 12'],['Weighted Dips','3 × 10'],['Tricep Pushdown','3 × 12'],['Overhead Extension','3 × 12']] },
-  back: { name:'Back + Biceps', tag:'Pull Day', list:[['Lat Pulldown','4 × 10'],['Barbell Row','4 × 8'],['Seated Cable Row','3 × 12'],['Pull-ups','3 × max'],['Barbell Curl','3 × 10'],['Hammer Curl','3 × 12']] },
-  shoulder:{ name:'Shoulders', tag:'Press Day', list:[['Overhead Press','4 × 8'],['Lateral Raise','4 × 15'],['Rear Delt Fly','3 × 15'],['Arnold Press','3 × 10'],['Face Pull','3 × 15'],['Shrugs','3 × 12']] },
-  legs: { name:'Legs + Abs', tag:'Leg Day', list:[['Back Squat','4 × 8'],['Romanian Deadlift','3 × 10'],['Leg Press','3 × 12'],['Walking Lunges','3 × 20'],['Hanging Leg Raise','3 × 15'],['Plank','3 × 60s']] },
-  rest: { name:'Rest + Recovery', tag:'Rest Day', list:[['Mobility Flow','20 min'],['Easy Walk','8k steps'],['Deep Stretch','15 min']] }
-};
+const SETC = ['#27272A','#F97316','#FACC15','#22C55E'];   // colour for 0,1,2,3 sets done
+const ZONE = { health:'#22C55E', wealth:'#F59E0B', happy:'#818CF8', journal:'#38BDF8', profile:'#94A3B8' };
 const DAY_SPLIT = ['rest','chest','back','shoulder','legs','chest','back']; // Sun..Sat
-const WATER = [250,250,500,500,500,500,750,750];
-const WATER_TOTAL = WATER.reduce((a,b)=>a+b,0);
-const MEALS = [['06:29','Wake Fuel'],['08:15','Breakfast'],['10:30','Mid-Morning'],['14:00','Lunch'],['17:00','Evening Snack'],['20:00','Dinner']];
+const OLD_WATER = [250,250,500,500,500,500,750,750];
 const MOVERS = [['M','Med','Meditation','lotus'],['O','Oxy','Breathwork','wind'],['V','Viz','Visualize','eye'],['R','Read','10 pages','book'],['S','Scribe','Journal','pen']];
-const TL = [['06:29','Wake up + 500ml water'],['06:40','MOVERS ritual'],['07:30','Workout session'],['08:15','Breakfast + plan the day'],['09:00','Deep work block 1'],['10:30','Mid-morning meal'],['11:00','Client edits + calls'],['14:00','Lunch + short walk'],['15:00','Deep work block 2'],['17:00','Snack + post content'],['18:30','Shoot / outdoors / learn'],['20:00','Dinner + family time'],['22:59','Read, scribe, lights out']];
 const CB_MS = ['Register GST','Launch portfolio website','10 active clients','Hire first editor','35 active clients','₹1 Cr turnover'];
 const CONTENT = [['Post today\'s content','cam'],['Engage 10 accounts','heart'],['Pitch 1 travel brand','send'],['Script next video','note']];
 const PASSION = [['Reading 10 pages','book','book0','Book name'],['Scribing / Journal','pen','scribe0','What did you write about?'],['Watch / Film','clap','film0','What did you watch or shoot?'],['Learn 1 new thing','bulb','learn0','What did you learn today?']];
-const TAGS = [['Health','#22C55E'],['Wealth','#F59E0B'],['Happy','#818CF8'],['General','#94A3B8']];
-const IMP_CATS = ['System','Health','Wealth','Happiness','UI'];
+const TAGS = [['Idea','#FACC15'],['Journal','#38BDF8'],['Health','#22C55E'],['Wealth','#F59E0B'],['Happy','#818CF8'],['General','#94A3B8']];
+const TASK_TYPES = ['Video edit','Invoice','Payment follow-up','Shoot','Admin','Other'];
+const IMP_CATS = ['System','Health','Wealth','Happiness','Journal','UI'];
 
-/* ---------- date helpers ---------- */
+/* ---------- helpers ---------- */
 const pad = n => String(n).padStart(2,'0');
 const ymd = d => d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 const today = () => ymd(new Date());
 const parseD = s => new Date(s+'T00:00:00');
 const addDays = (s,n) => { const d=parseD(s); d.setDate(d.getDate()+n); return ymd(d); };
 const dayDiff = (a,b) => Math.round((parseD(b)-parseD(a))/864e5);
-const t12 = hm => { const [h,m]=hm.split(':').map(Number); return ((h%12)||12)+':'+pad(m)+(h<12?' AM':' PM'); };
-const splitFor = date => SPLITS[DAY_SPLIT[parseD(date).getDay()]];
-
-/* ---------- utils ---------- */
+const nowHM = () => { const d=new Date(); return pad(d.getHours())+':'+pad(d.getMinutes()); };
+const mins = t => { if(!t) return null; const [h,m]=String(t).split(':').map(Number); return isNaN(h)?null:h*60+(m||0); };
+const nightMins = t => { const m = mins(t); return m==null?null:(m<720?m+1440:m); };   // 01:00 counts as later than 23:00
+const t12 = hm => { if(!hm) return '—'; const [h,m]=hm.split(':').map(Number); return ((h%12)||12)+':'+pad(m)+(h<12?' AM':' PM'); };
+const fmtD = (s,o={weekday:'short',day:'numeric',month:'short'}) => parseD(s).toLocaleDateString('en-IN',o);
+const monthKey = s => s.slice(0,7);
+const monthName = k => new Date(k+'-01T00:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+const monthShort = k => new Date(k+'-01T00:00:00').toLocaleDateString('en-IN',{month:'short',year:'numeric'});
 const $ = s => document.querySelector(s);
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num = v => parseFloat(String(v??'').replace(/[^\d.]/g,'')) || 0;
@@ -264,106 +262,203 @@ const inr = n => '₹'+Math.round(n).toLocaleString('en-IN');
 const inrShort = n => n>=1e7 ? '₹'+(n/1e7).toFixed(2)+'Cr' : n>=1e5 ? '₹'+(n/1e5).toFixed(2)+'L' : inr(n);
 const ic = (id,cls='',style='') => `<svg class="ico ${cls}" style="${style}"><use href="#i-${id}"/></svg>`;
 const ago = ts => { const s=(Date.now()-ts)/1000; if(s<60) return 'just now'; if(s<3600) return Math.floor(s/60)+'m ago'; if(s<86400) return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; };
+const hm2 = m => { m=Math.round(m); m=Math.abs(m); return m>=60?Math.floor(m/60)+'h '+pad(m%60)+'m':m+'m'; };
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+/* =====================================================================
+   PLAN (editable, synced) + PER-DAY RECORDS
+   ===================================================================== */
+const S3 = () => [{kg:10,reps:12},{kg:12.5,reps:10},{kg:15,reps:8}];
+const EX = names => names.map(n=>({ n, sets:S3() }));
+function MEALS2(){ return [ {n:'Wake Fuel (lemon / hot water 500ml)',t:'06:29'},{n:'Breakfast (black coffee + PB bread)',t:'08:00'},
+  {n:'Post-Workout Protein Shake',t:'10:45'},{n:'Lunch',t:'14:30'},{n:'High Tea / Evening Snacks',t:'17:30'},{n:'Dinner',t:'20:30'} ]; }
+function defCfg(){
+  return {
+    goals:{ wake:'06:29', sleep:'22:59', water:4000, lateMin:30, warm:10, stretch:5, weight:'' },
+    splits:{
+      chest:   { name:'Chest + Triceps', p:'Chest', s:'Triceps', pc:4, ex:EX(['Incline DB Press','Flat Bench Press','Butterfly (Pec Deck)','Cable Fly – Lower Chest','Rope Pushdown','Overhead DB Extension','Bench Dips']) },
+      back:    { name:'Back + Biceps', p:'Back', s:'Biceps', pc:4, ex:EX(['Lat Pulldown','Seated Cable Row','Bent-over Row','Straight-arm Pulldown','Rod Biceps Curl','Hammer Curl','Incline DB Curl']) },
+      shoulder:{ name:'Shoulders + Forearms', p:'Shoulders', s:'Forearms', pc:4, ex:EX(['DB Shoulder Press','Lateral Raise','Front Raise','Rear Delt Fly','Wrist Curl','Reverse Wrist Curl','Farmer Hold']) },
+      legs:    { name:'Legs + Abs', p:'Legs', s:'Abs', pc:4, ex:EX(['Squat','Leg Press','Leg Extension','Leg Curl','Crunches','Hanging Leg Raise','Plank']) },
+      rest:    { name:'Rest + Recovery', p:'', s:'', pc:0, ex:[] }
+    },
+    meals:MEALS2(),
+    tl:[ ['06:29','Wake up + 500ml water'],['06:40','MOVERS ritual'],['07:00','Deep work block (1 hr)'],['08:00','Workout session'],
+         ['09:15','Breakfast / protein shake + rest'],['10:00','Deep work session (3 hrs)'],['13:00','Bath'],['13:30','Lunch'],['14:15','Rest'],
+         ['15:00','Client edits + calls'],['17:30','Snacks + post content'],['18:30','Outdoor / learn'],['20:00','Dinner'],['20:45','Family / me time'],
+         ['22:00','Read'],['22:40','Journal + sleep by 10:59 PM'] ],
+    periodic:[ {id:'groom',n:'Groom',every:14,val:false,unit:''},{id:'weight',n:'Weight check',every:15,val:true,unit:'kg'} ],
+    challenge:{ start:'2026-10-05', len:90, title:'90-Day Reset' }, rev:2,
+    kpi:{ earning:'', bank:'', clients:'' }, wk:{}, wg:['','',''], idea:'',
+    tasks:[]
+  };
+}
+function blankDay(){
+  return { at:0, wo:null, water:[], cre:false, creT:'', meals:{}, cheat:'', protein:false, mv:{}, sleep:{wake:'',slept:''},
+    tl:{}, ct:{}, ps:{}, txt:{book0:'',scribe0:'',film0:'',learn0:''}, dw:'', j:{steps:'',rate:0,wealth:false,wn:'',text:''}, per:{} };
+}
+const BLANK = Object.freeze(blankDay());
+function normDay(d){ const b = blankDay(); d = d||{};
+  return { ...b, ...d, sleep:{...b.sleep,...(d.sleep||{})}, txt:{...b.txt,...(d.txt||{})}, j:{...b.j,...(d.j||{})},
+    mv:d.mv||{}, meals:d.meals||{}, tl:d.tl||{}, ct:d.ct||{}, ps:d.ps||{}, per:d.per||{}, water:Array.isArray(d.water)?d.water:[] }; }
+function normCfg(c){ const b = defCfg(); c = c||{};
+  const m = { ...b, ...c, goals:{...b.goals,...(c.goals||{})}, splits:{...b.splits,...(c.splits||{})}, challenge:{...b.challenge,...(c.challenge||{})},
+    kpi:{...b.kpi,...(c.kpi||{})}, wk:c.wk||{}, wg:Array.isArray(c.wg)?c.wg:b.wg, tasks:Array.isArray(c.tasks)?c.tasks:[] };
+  if(!Array.isArray(m.meals)||!m.meals.length) m.meals = b.meals;
+  if(!Array.isArray(m.tl)||!m.tl.length) m.tl = b.tl;
+  if(!Array.isArray(m.periodic)) m.periodic = b.periodic;
+  if((c.rev||0) < 2){ m.meals = MEALS2(); m.challenge.start = '2026-10-05'; m.rev = 2; }   // 11 Nov: Rishi's meal times + real 90-day start
+  return m; }
 
 /* ---------- state ---------- */
-const DEF_SLEEP = { at:'22:59', wake:'06:29' };
-function fresh(){
-  return { sets:{}, water:[], meals:{}, mealTxt:{}, movers:{M:false,O:false,V:false,R:false,S:false}, tl:{}, checks:{}, notes:[],
-    kpi:{earning:'',bank:'',clients:'',dw:''}, clients:[], sleep:{...DEF_SLEEP}, rating:0, wdScores:{},
-    inlines:{wg0:'',wg1:'',wg2:'',book0:'',film0:'',learn0:'',scribe0:''}, cheat:'', contentIdea:'', creatine:false, improve:[],
-    sheetsUrl:'', lastDay:today(), lastSync:0,
-    /* sync bookkeeping */ updatedAt:0, clientsAt:0, dirty:false, queue:[], delNotes:[], delImprove:[], history:{} };
+function freshState(){
+  return { v:4, days:{}, cfg:defCfg(), cfgAt:0, notes:[], improve:[], clients:[], clientsAt:0, wdScores:{},
+    sheetsUrl:'', lastSync:0, dirty:[], cfgDirty:false, delNotes:[], delImprove:[], history:{}, migrated:false };
 }
-let state = load();
-let ui = (()=>{ try{ return JSON.parse(localStorage.getItem(UIKEY))||{}; }catch(e){ return {}; } })();
-ui.tab = ui.tab || 'health'; ui.closed = ui.closed || {}; ui.noteFilter = ui.noteFilter || 'All'; ui.noteTag = ui.noteTag || 'General';
-ui.sheetTag = ui.sheetTag || 'General'; ui.range = ui.range || 'today'; ui.impCat = ui.impCat || 'System';
-let editSeq = 0, syncing = false, syncState = { s:'off', msg:'' };
-
+function fromV3Day(ds){            // convert a v3 day snapshot into a v4 day
+  const d = blankDay(); if(!ds) return d;
+  d.water = (ds.water||[]).map(i=>({ ml:OLD_WATER[i]||250, t:'' }));
+  for(let i=0;i<6;i++){ const done = ds.meals?.[i], f = ds.mealTxt?.[i]; if(done||f) d.meals[i] = { d:!!done, at:'', q:'', f:f||'' }; }
+  d.mv = ds.movers||{}; d.cre = !!ds.creatine; d.cheat = ds.cheat||'';
+  d.sleep.wake = ds.sleep?.wake||'';
+  Object.entries(ds.checks||{}).forEach(([k,v])=>{ if(/^ct\d/.test(k)) d.ct[k.slice(2)] = v; if(/^ps\d/.test(k)) d.ps[k.slice(2)] = v; });
+  ['book0','scribe0','film0','learn0'].forEach(k=>{ if(ds.inlines?.[k]) d.txt[k] = ds.inlines[k]; });
+  d.dw = ds.kpi?.dw||''; d.at = 1;
+  return d;
+}
 function load(){
   let s; try{ s = JSON.parse(localStorage.getItem(KEY)); }catch(e){}
-  const base = fresh();
-  if(!s) return base;
-  const m = { ...base, ...s };
-  m.kpi = { ...base.kpi, ...(s.kpi||{}) }; m.movers = { ...base.movers, ...(s.movers||{}) };
-  m.inlines = { ...base.inlines, ...(s.inlines||{}) }; m.sleep = { ...base.sleep, ...(s.sleep||{}) };
-  return m;
+  if(s && s.v===4){ s = { ...freshState(), ...s }; s.cfg = normCfg(s.cfg); Object.keys(s.days).forEach(k=>s.days[k]=normDay(s.days[k])); return s; }
+  const st = freshState();
+  let o; try{ o = JSON.parse(localStorage.getItem(OLDKEY)); }catch(e){}
+  if(o){                             // one-time migration v3 -> v4 (the v3 copy is left in place)
+    const day = fromV3Day(o); day.at = o.updatedAt||Date.now();
+    if(o.lastDay) st.days[o.lastDay] = day;
+    st.cfg.kpi = { earning:o.kpi?.earning||'', bank:o.kpi?.bank||'', clients:o.kpi?.clients||'' };
+    Object.entries(o.checks||{}).forEach(([k,v])=>{ if(/^(g|cb)\d/.test(k)) st.cfg.wk[k] = v; });
+    st.cfg.wg = [o.inlines?.wg0||'', o.inlines?.wg1||'', o.inlines?.wg2||''];
+    st.cfg.idea = o.contentIdea||'';
+    st.notes = o.notes||[]; st.improve = o.improve||[]; st.clients = o.clients||[]; st.clientsAt = o.clientsAt||0;
+    st.wdScores = o.wdScores||{}; st.sheetsUrl = o.sheetsUrl||''; st.history = o.history||{};
+    st.cfgAt = Date.now(); st.cfgDirty = true; st.migrated = true;
+    if(o.lastDay) st.dirty = [o.lastDay];
+  }
+  return st;
 }
-function saveLocal(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){ toast('Storage full — export & clear history'); } }
-function saveUI(){ try{ localStorage.setItem(UIKEY, JSON.stringify(ui)); }catch(e){} }
-function touch(){ state.updatedAt = Date.now(); state.dirty = true; editSeq++; saveLocal(); }
+let state = load();
+let cfg = state.cfg;
+let ui = (()=>{ try{ return JSON.parse(localStorage.getItem(UIKEY))||{}; }catch(e){ return {}; } })();
+ui.tab = ui.tab || 'health'; ui.closed = ui.closed || {}; ui.noteFilter = ui.noteFilter || 'All'; ui.noteTag = ui.noteTag || 'Idea';
+ui.sheetTag = ui.sheetTag || 'Idea'; ui.range = ui.range || 'week'; ui.impCat = ui.impCat || 'System'; ui.drafts = ui.drafts || {};
+ui.openEx = {}; ui.date = today(); ui.custom = false;
+let editSeq = 0, syncing = false, syncState = { s:'off', msg:'' }, pendingRender = false, lastToday = today();
 
-/* ---------- metrics ---------- */
-function sleepHrs(sl){ const [ah,am]=sl.at.split(':').map(Number), [wh,wm]=sl.wake.split(':').map(Number);
-  let m = (wh*60+wm) - (ah*60+am); if(m<0) m += 1440; return Math.round(m/6)/10; }
-function calc(date = today()){
-  const sp = splitFor(date), total = sp.list.length*3; let done = 0;
-  for(let e=0;e<sp.list.length;e++) for(let s=0;s<3;s++) if(state.sets[`${date}-e${e}-s${s}`]) done++;
-  const waterMl = state.water.reduce((a,i)=>a+(WATER[i]||0),0);
-  const meals = MEALS.filter((_,i)=>state.meals[i]).length;
-  const movers = MOVERS.filter(m=>state.movers[m[0]]).length;
-  const sh = sleepHrs(state.sleep);
-  const w = Math.round(done/total*100);
-  const d = Math.round((meals/6*0.6 + Math.min(waterMl/WATER_TOTAL,1)*0.3 + (state.creatine?0.1:0))*100);
-  const m = movers*20;
-  const live = Math.round((w + d + m + Math.min(sh/8,1)*100)/4);
-  return { sp, total, done, waterMl, meals, movers, sh, w, d, m, live };
-}
-function dayState(date){
-  const sets = {}; Object.keys(state.sets).forEach(k=>{ if(k.startsWith(date) && state.sets[k]) sets[k]=true; });
-  const checks = {}; Object.keys(state.checks).forEach(k=>{ if(/^(ct|ps)/.test(k)) checks[k]=state.checks[k]; });
-  return { sets, water:state.water, meals:state.meals, mealTxt:state.mealTxt, movers:state.movers, tl:state.tl, sleep:state.sleep,
-    rating:state.rating, creatine:state.creatine, cheat:state.cheat, checks, contentIdea:state.contentIdea, kpi:state.kpi,
-    inlines:{ book0:state.inlines.book0, scribe0:state.inlines.scribe0, film0:state.inlines.film0, learn0:state.inlines.learn0 } };
-}
-function applyDayState(ds){
-  if(!ds) return;
-  ['water','meals','mealTxt','tl','rating','creatine','cheat','contentIdea'].forEach(k=>{ if(ds[k]!==undefined) state[k]=ds[k]; });
-  if(ds.sets) state.sets = ds.sets;
-  if(ds.movers) state.movers = { ...state.movers, ...ds.movers };
-  if(ds.sleep) state.sleep = { ...state.sleep, ...ds.sleep };
-  if(ds.kpi) state.kpi = { ...state.kpi, ...ds.kpi };
-  if(ds.inlines) state.inlines = { ...state.inlines, ...ds.inlines };
-  if(ds.checks){ Object.keys(state.checks).forEach(k=>{ if(/^(ct|ps)/.test(k)) delete state.checks[k]; }); Object.assign(state.checks, ds.checks); }
-}
-function snap(date){
-  const c = calc(date);
-  const dayNotes = state.notes.filter(n=>ymd(new Date(n.ts))===date).map(n=>`[${n.tag}] ${n.text}`).join(' | ');
-  return { date, workoutPct:c.w, dietPct:c.d, moversPct:c.m, sleepHrs:c.sh, waterMl:c.waterMl,
-    earning:num(state.kpi.earning), bank:num(state.kpi.bank), clients:num(state.kpi.clients), deepWork:num(state.kpi.dw),
-    rating:state.rating, notes:dayNotes, wdScores:JSON.stringify(state.wdScores), updatedAt:state.updatedAt||Date.now(),
-    stateJson:JSON.stringify(dayState(date)) };
-}
+function saveLocal(){ state.cfg = cfg; try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){ toast('Storage full — export & clear history'); } }
+function saveUI(){ try{ const { openEx, custom, date, ...keep } = ui; localStorage.setItem(UIKEY, JSON.stringify(keep)); }catch(e){} }
+const peek = date => state.days[date] || BLANK;
+function day(date = ui.date){ if(!state.days[date]) state.days[date] = blankDay(); return state.days[date]; }
+function markDay(date = ui.date){ const d = day(date); d.at = Date.now(); if(!state.dirty.includes(date)) state.dirty.push(date);
+  const w = woStats(date); if(w.score!=null) state.wdScores[date] = w.score; editSeq++; saveLocal(); }
+function markCfg(){ state.cfgAt = Date.now(); state.cfgDirty = true; const t = today(); if(!state.dirty.includes(t)) state.dirty.push(t); editSeq++; saveLocal(); }
+function markMisc(){ const t = today(); if(!state.dirty.includes(t)) state.dirty.push(t); editSeq++; saveLocal(); }
+const isDirty = () => state.dirty.length>0 || state.cfgDirty;
 
-/* ---------- daily reset at midnight ---------- */
+/* =====================================================================
+   METRICS
+   ===================================================================== */
+const splitKey = date => DAY_SPLIT[parseD(date).getDay()];
+function ensureWo(date = ui.date){
+  const d = day(date);
+  if(!d.wo){
+    const key = splitKey(date), sp = cfg.splits[key];
+    const ex = sp.ex.map((e,i)=>({ n:e.n, g:i<sp.pc?'p':'s', s:e.sets.map(x=>({ kg:x.kg, reps:x.reps, d:false })) }));
+    d.wo = { split:key, ex, target:ex.reduce((a,e)=>a+e.s.reduce((b,x)=>b+num(x.reps),0),0), warm:false, stretch:false, push:'', squat:'' };
+  }
+  return d.wo;
+}
+/* Auto workout score (Rishi's rules):
+   5 = every set + warm-up + stretch
+   4 = 80%+ of planned reps, or all but 1 exercise complete
+   3 = all but 2 exercises, or 15/21 sets, or main muscle done but support skipped
+   2 = 3 exercises, or a home workout (push-ups / squats)
+   1 = showed up: warm-up or a few sets
+   0 = nothing */
+function woStats(date){
+  const d = peek(date), key = d.wo?.split || splitKey(date), rest = key==='rest';
+  const wo = d.wo || { ex:[], target:0, warm:false, stretch:false, push:'', squat:'' };
+  const ex = wo.ex||[], n = ex.length;
+  let setsT = 0, setsD = 0, repsD = 0, full = 0, any = 0, pN = 0, pFull = 0;
+  ex.forEach(e=>{ const dn = e.s.filter(s=>s.d); setsT += e.s.length; setsD += dn.length; repsD += dn.reduce((a,s)=>a+num(s.reps),0);
+    const isFull = e.s.length>0 && dn.length===e.s.length; if(isFull) full++; if(dn.length) any++; if(e.g==='p'){ pN++; if(isFull) pFull++; } });
+  const target = wo.target || setsT*10;
+  const home = num(wo.push)+num(wo.squat) > 0;
+  const spl = cfg.splits[key] || {};
+  let score, why;
+  if(n && setsD===setsT && wo.warm && wo.stretch){ score=5; why='All sets + warm-up + stretch'; }
+  else if(n>=3 && (repsD>=0.8*target || full>=n-1)){ score=4; why = full>=n-1 ? `${full}/${n} exercises complete` : `${repsD}/${target} reps (80%+)`; }
+  else if(n>=3 && (full>=n-2 || setsD>=Math.ceil(setsT*15/21) || (pN && pFull===pN))){
+    score=3; why = full>=n-2 ? `${full}/${n} exercises complete` : setsD>=Math.ceil(setsT*15/21) ? `${setsD}/${setsT} sets` : `All ${spl.p||'main'} done, ${spl.s||'support'} skipped`; }
+  else if(any>=3 || home){ score=2; why = home && any<3 ? `Home workout (${num(wo.push)} push-ups, ${num(wo.squat)} squats)` : `${any} exercises`; }
+  else if(wo.warm || setsD>0){ score=1; why='Showed up — light session'; }
+  else { score=0; why='No workout logged yet'; }
+  if(rest && score===0){ score=null; why='Rest day'; }
+  if(!d.wo && !rest && state.wdScores[date]!=null) { score = state.wdScores[date]; why = 'Score from earlier version'; }
+  return { n, setsT, setsD, repsD, target, full, any, score, why, rest, pct: target ? Math.round(repsD/target*100) : 0, key };
+}
+function sleepHrs(date){
+  const prev = state.days[addDays(date,-1)]?.sleep?.slept, wake = peek(date).sleep.wake;
+  if(!prev || !wake) return null;
+  let m = mins(wake) - mins(prev); if(m<=0) m += 1440; return Math.round(m/6)/10;
+}
+function mealStat(date, i){
+  const m = peek(date).meals[i], ideal = cfg.meals[i]?.t;
+  if(!m || !m.d) return { k:'pending' };
+  const at = m.at || ideal, diff = mins(at)-mins(ideal), thr = num(cfg.goals.lateMin)||30;
+  return { k: diff>thr ? 'late' : diff< -thr ? 'early' : 'ontime', diff };
+}
+function dietStats(date){
+  const d = peek(date), n = cfg.meals.length;
+  const water = d.water.reduce((a,w)=>a+num(w.ml),0), target = num(cfg.goals.water)||4000;
+  let done = 0, ontime = 0, late = 0;
+  cfg.meals.forEach((_,i)=>{ const s = mealStat(date,i); if(s.k!=='pending'){ done++; if(s.k==='late') late++; else ontime++; } });
+  const pct = Math.round((done/n*0.6 + Math.min(water/target,1)*0.3 + (d.cre?0.1:0))*100);
+  return { water, target, done, ontime, late, n, pct };
+}
+const moverCount = date => { const mv = peek(date).mv; return MOVERS.filter(m=>mv[m[0]]).length; };
+function habits(date){
+  const d = peek(date), w = woStats(date), g = cfg.goals;
+  const wakeOk = d.sleep.wake ? mins(d.sleep.wake) <= mins(g.wake) : null;
+  const sleepOk = d.sleep.slept ? nightMins(d.sleep.slept) <= nightMins(g.sleep) : null;
+  const workout = w.rest && w.score==null ? 'rest' : (w.score!=null && w.score>=2);
+  const items = [ wakeOk, workout, d.protein, d.j.wealth, sleepOk, moverCount(date)===5 ];
+  const done = items.filter(v=>v===true||v==='rest').length;
+  return { wakeOk, sleepOk, workout, done, total:items.length, hrs:sleepHrs(date) };
+}
+const logged = date => (state.days[date]?.at||0) > 0;
+
+/* ---------- midnight: records are per date, so nothing is wiped ---------- */
 function rollover(){
-  const t = today();
-  if(state.lastDay === t) return false;
-  const prev = state.lastDay;
-  if(prev){ const row = snap(prev); state.history[prev] = row; state.queue.push(row); }
-  state.sets = {}; state.water = []; state.meals = {}; state.mealTxt = {}; state.tl = {};
-  state.movers = {M:false,O:false,V:false,R:false,S:false}; state.sleep = {...DEF_SLEEP};
-  state.rating = 0; state.creatine = false; state.cheat = ''; state.kpi.dw = '';
-  state.inlines.scribe0 = ''; state.inlines.film0 = ''; state.inlines.learn0 = '';
-  Object.keys(state.checks).forEach(k=>{ if(/^(ct|ps)/.test(k)) delete state.checks[k]; });
-  const keys = Object.keys(state.history).sort(); while(keys.length>400) delete state.history[keys.shift()];
-  state.lastDay = t; state.updatedAt = Date.now(); state.dirty = true; editSeq++; saveLocal();
-  return true;
+  const t = today(); if(t===lastToday) return false;
+  if(ui.date===lastToday) ui.date = t;
+  lastToday = t;
+  const cutoff = addDays(t,-KEEP_DAYS);
+  Object.keys(state.days).forEach(k=>{ if(k<cutoff && !state.dirty.includes(k)) delete state.days[k]; });
+  saveLocal(); return true;
 }
 
 /* =====================================================================
-   RENDER
+   RENDER SHELL
    ===================================================================== */
-const TABS = [['health','Health','dumbbell'],['wealth','Wealth','wallet'],['happy','Happy','spark'],['profile','Profile','user']];
-const ZONE_NAME = { health:'Health Hub', wealth:'Wealth Hub', happy:'Happiness Hub', profile:'Control Room' };
+const TABS = [['health','Health','dumbbell'],['wealth','Wealth','wallet'],['happy','Happy','spark'],['journal','Journal','journal']];
+const ZONE_NAME = { health:'Health Hub', wealth:'Wealth Hub', happy:'Happiness Hub', journal:'Daily Journal', profile:'Control Room' };
+const typing = () => { const a = document.activeElement; return !!a && (a.tagName==='TEXTAREA' || a.tagName==='SELECT' || (a.tagName==='INPUT' && !['button','checkbox'].includes(a.type))); };
 
 function render(anim){
-  const z = ZONE[ui.tab];
-  document.documentElement.style.setProperty('--z', z);
+  pendingRender = false;
+  document.documentElement.style.setProperty('--z', ZONE[ui.tab]);
   $('#hdr-zone').textContent = '• '+ZONE_NAME[ui.tab];
-  const t = today(), d = parseD(t);
-  const cbDay = dayDiff(CB_START, t)+1;
-  $('#hdr-date').textContent = d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + (cbDay>0 ? ' • D'+cbDay : '');
+  const t = today(), cbDay = dayDiff(CB_START, t)+1;
+  $('#hdr-date').textContent = parseD(t).toLocaleDateString('en-US',{month:'short',day:'numeric'}) + (cbDay>0 ? ' • D'+cbDay : '');
   $('#rail').innerHTML = TABS.slice(0,3).map(([id,label,icon])=>{
     const on = ui.tab===id, col = ZONE[id];
     return `<button class="flex-1 py-2 px-2 rounded-full flex items-center justify-center gap-1.5 press" data-act="tab:${id}"
@@ -373,14 +468,32 @@ function render(anim){
   }).join('');
   $('#dock').innerHTML = TABS.map(([id,label,icon])=>{
     const on = ui.tab===id;
-    return `<a href="#" class="relative flex flex-col items-center justify-center min-w-[56px] min-h-[44px] press ${on?'on':''}" data-act="tab:${id}" style="color:${on?'#F8FAFC':'#94A3B8'}">
+    return `<a href="#" class="relative flex flex-col items-center justify-center min-w-[56px] min-h-[44px] press" data-act="tab:${id}" style="color:${on?'#F8FAFC':'#94A3B8'}">
       ${ic(icon,'',`width:22px;height:22px;color:${ZONE[id]}`)}<span class="ui mt-0.5">${label}</span>
-      <span class="dot absolute -bottom-1.5 w-1.5 h-1.5 rounded-full" style="background:${ZONE[id]};opacity:0"></span></a>`;
+      <span class="absolute -bottom-1.5 w-1.5 h-1.5 rounded-full" style="background:${ZONE[id]};opacity:${on?1:0}"></span></a>`;
   }).join('');
-  const v = $('#view');
-  v.innerHTML = `<div class="${anim?'fade ':''}space-y-4">${({health:vHealth,wealth:vWealth,happy:vHappy,profile:vProfile})[ui.tab]()}</div>`;
+  $('#datebar').innerHTML = dateBar();
+  $('#view').innerHTML = `<div class="${anim?'fade ':''}space-y-4">${({health:vHealth,wealth:vWealth,happy:vHappy,journal:vJournal,profile:vProfile})[ui.tab]()}</div>`;
+  restoreDrafts();
   derive();
   paintSync();
+}
+function dateBar(){
+  if(ui.tab==='profile') return '';
+  const t = today(), isT = ui.date===t, diff = dayDiff(ui.date,t);
+  const label = isT ? 'Today' : diff===1 ? 'Yesterday' : diff+' days ago';
+  return `<div class="flex items-center gap-2">
+    <button class="w-10 h-10 rounded-full flex items-center justify-center press shrink-0" style="background:#16161C;border:1px solid rgba(255,255,255,.06)" data-act="dateShift:-1" aria-label="Previous day">${ic('chevl','','width:18px;height:18px')}</button>
+    <label class="flex-1 relative h-10 rounded-full flex items-center justify-center gap-2 cursor-pointer overflow-hidden" style="background:#16161C;border:1px solid ${isT?'rgba(255,255,255,.06)':'#F59E0B66'}">
+      ${ic('cal','',`width:15px;height:15px;color:${isT?'#94A3B8':'#F59E0B'}`)}
+      <span class="g text-[14px] font-semibold">${fmtD(ui.date)}</span><span class="lbl" style="color:${isT?'var(--z)':'#F59E0B'}">${label}</span>
+      <input type="date" class="absolute inset-0 opacity-0 w-full h-full" data-act-input="datePick" value="${ui.date}" max="${t}" aria-label="Pick a date">
+    </label>
+    ${isT ? `<button class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 opacity-30" style="background:#16161C" disabled aria-label="Next day">${ic('chevr','','width:18px;height:18px')}</button>`
+          : `<button class="w-10 h-10 rounded-full flex items-center justify-center press shrink-0" style="background:#16161C;border:1px solid rgba(255,255,255,.06)" data-act="dateShift:1" aria-label="Next day">${ic('chevr','','width:18px;height:18px')}</button>`}
+  </div>
+  ${isT?'':`<div class="flex items-center justify-center gap-2 mt-1.5"><p class="ui" style="color:#F59E0B">Editing a past day — saves to ${fmtD(ui.date,{day:'numeric',month:'short'})}</p>
+    <button class="lbl px-2 py-0.5 rounded-md press" style="background:#F59E0B;color:#0A0A0F" data-act="dateToday">Back to today</button></div>`}`;
 }
 
 /* ---------- shared pieces ---------- */
@@ -410,18 +523,18 @@ function ring(id, label){
       <span class="absolute g text-[11px] font-bold num" id="${id}-v">0%</span>
     </div>
     <span class="lbl mt-1.5">${label}</span>
-    <span class="text-[10px] leading-4 sec num" id="${id}-s"></span>
+    <span class="text-[10px] leading-4 sec num truncate w-full" id="${id}-s"></span>
   </div>`;
 }
 function setRing(id, frac, val, sub, color){
   const c = document.getElementById(id+'-c'); if(!c) return;
-  c.setAttribute('stroke-dashoffset', (100.53*(1-Math.max(0,Math.min(1,frac)))).toFixed(2));
+  c.setAttribute('stroke-dashoffset', (100.53*(1-Math.max(0,Math.min(1,frac||0)))).toFixed(2));
   if(color) c.setAttribute('stroke', color);
   document.getElementById(id+'-v').textContent = val;
   document.getElementById(id+'-s').textContent = sub;
 }
 const setTxt = (id, t) => { const e=document.getElementById(id); if(e) e.textContent = t; };
-const setW = (id, p, col) => { const e=document.getElementById(id); if(e){ e.style.width = Math.max(0,Math.min(100,p))+'%'; if(col) e.style.background = col; } };
+const setW = (id, p) => { const e=document.getElementById(id); if(e) e.style.width = Math.max(0,Math.min(100,p))+'%'; };
 function tick(on, color, size=22){
   return on ? `<span class="rounded-full flex items-center justify-center shrink-0" style="width:${size}px;height:${size}px;background:${color};color:#0A0A0F">${ic('check','',`width:${size*.65}px;height:${size*.65}px;stroke-width:3`)}</span>`
             : `<span class="block rounded-full shrink-0" style="width:${size}px;height:${size}px;border:2px solid #3F3F46"></span>`;
@@ -430,86 +543,160 @@ function box(on, color){
   return on ? `<span class="w-6 h-6 rounded-md flex items-center justify-center shrink-0" style="background:${color};color:#0A0A0F">${ic('check','','width:16px;height:16px;stroke-width:3')}</span>`
             : `<span class="block w-6 h-6 rounded-md shrink-0" style="background:#35343a"></span>`;
 }
+function yesNo(v){
+  if(v==='rest') return `<span class="chip" style="color:#94A3B8">Rest</span>`;
+  if(v===true) return `<span class="w-7 h-7 rounded-full flex items-center justify-center" style="background:#22C55E26;color:#22C55E">${ic('check','','width:16px;height:16px;stroke-width:3')}</span>`;
+  if(v===false) return `<span class="w-7 h-7 rounded-full flex items-center justify-center" style="background:#EF444426;color:#EF4444">${ic('x','','width:15px;height:15px;stroke-width:3')}</span>`;
+  return `<span class="w-7 h-7 rounded-full flex items-center justify-center lbl" style="background:#1F1F25;color:#64748B">–</span>`;
+}
 
 /* =====================================================================
    TAB 1 — HEALTH
    ===================================================================== */
 function vHealth(){
-  const t = today(), G = ZONE.health, c = calc(t), sp = c.sp;
-  // ISO week Mon..Sun
-  const dow = (parseD(t).getDay()+6)%7, mon = addDays(t,-dow);
+  const date = ui.date, G = '#22C55E', d = day(date);
+  const wo = ensureWo(date), key = wo.split, sp = cfg.splits[key], w = woStats(date);
+  const dow = (parseD(date).getDay()+6)%7, mon = addDays(date,-dow);
   const week = ['MON','TUE','WED','THU','FRI','SAT','SUN'].map((lab,i)=>{
-    const ds = addDays(mon,i), sc = state.wdScores[ds]||0, col = SCORE[sc], isT = ds===t;
-    return `<button class="flex flex-col items-center gap-1 press" data-act="wd:${ds}">
-      <span class="lbl" style="font-size:10px;color:${isT?'#F8FAFC':'#94A3B8'}">${lab}</span>
+    const ds = addDays(mon,i), st = woStats(ds), sc = st.score, col = sc==null ? '#27272A' : SCORE[sc], isV = ds===date, fut = ds>today();
+    return `<button class="flex flex-col items-center gap-1 press ${fut?'opacity-30':''}" ${fut?'disabled':''} data-act="goDate:${ds}" aria-label="Open ${ds}">
+      <span class="lbl" style="font-size:10px;color:${isV?'#F8FAFC':'#94A3B8'}">${lab}</span>
       <span class="w-8 h-8 rounded-full g text-[13px] font-bold flex items-center justify-center num"
-        style="background:${sc?col+'26':'#1F1F25'};color:${sc?col:'#64748B'};${isT?`box-shadow:0 0 0 2px #0A0A0F,0 0 0 3.5px ${sc?col:'#94A3B8'}`:''}">${sc||'–'}</span>
+        style="background:${sc?col+'26':'#1F1F25'};color:${sc?col:'#64748B'};${isV?`box-shadow:0 0 0 2px #0A0A0F,0 0 0 3.5px ${sc?col:'#94A3B8'}`:''}">${sc==null?(st.rest?'R':'–'):sc}</span>
     </button>`;
   }).join('');
-  const rate = [1,2,3,4,5].map(n=>{
-    const on = state.rating===n, col = SCORE[n];
-    return `<button class="flex-1 h-8 rounded-lg g text-[12px] font-bold press" data-act="rate:${n}"
-      style="background:${on?col:col+'1F'};color:${on?'#0A0A0F':col};${on?`box-shadow:0 0 10px ${col}88`:''}">${n}</button>`;
-  }).join('');
-  const ex = sp.list.map(([name,tgt],e)=>{
-    const dots = [0,1,2].map(s=>{ const on = state.sets[`${t}-e${e}-s${s}`];
-      return `<button class="w-7 h-7 flex items-center justify-center press" data-act="set:${e}:${s}" aria-label="Set ${s+1}">
-        <span class="w-3 h-3 rounded-full" style="background:${on?G:'#35343a'};${on?`box-shadow:0 0 6px ${G}`:''}"></span></button>`; }).join('');
-    const all = [0,1,2].every(s=>state.sets[`${t}-e${e}-s${s}`]);
-    return `<div class="sub p-2.5">
-      <span class="g text-[13px] font-semibold block truncate" style="${all?`color:${G}`:''}">${esc(name)}</span>
-      <div class="flex items-center justify-between -mb-1"><span class="ui sec">${tgt}</span><div class="flex -mr-1.5">${dots}</div></div>
+
+  const exRow = (e,i) => {
+    const dn = e.s.filter(s=>s.d).length, col = SETC[Math.min(dn,3)], open = ui.openEx[i];
+    const best = e.s.filter(s=>s.d).sort((a,b)=>num(b.kg)-num(a.kg))[0];
+    const hist = open ? exHistory(e.n, date).slice(0,3) : [];
+    return `<div class="sub overflow-hidden">
+      <div class="flex items-center gap-2.5 p-2">
+        <button class="w-11 h-11 rounded-full flex flex-col items-center justify-center shrink-0 press" data-act="cyc:${i}" aria-label="Log a set for ${esc(e.n)}"
+          style="background:${dn?col+'26':'#0A0A0F'};border:2px solid ${dn?col:'#3F3F46'};color:${dn?col:'#64748B'}">
+          <span class="g text-[15px] font-bold leading-4 num">${dn}</span><span class="text-[8px] leading-3 font-semibold">/${e.s.length}</span></button>
+        <input class="bare g text-[14px] font-semibold flex-1" data-in="d.wo.ex.${i}.n" value="${esc(e.n)}" placeholder="Exercise name">
+        <span class="ui sec num shrink-0">${best?`${num(best.kg)}kg×${num(best.reps)}`:''}</span>
+        <button class="w-8 h-8 flex items-center justify-center press shrink-0" data-act="openEx:${i}" aria-label="Edit sets">${ic(open?'chev':'chevd','','width:18px;height:18px;color:#94A3B8')}</button>
+      </div>
+      ${open?`<div class="px-2.5 pb-2.5 space-y-1.5">
+        ${e.s.map((s,j)=>`<div class="flex items-center gap-2">
+          <span class="lbl sec w-11 shrink-0">Set ${j+1}</span>
+          <input class="cell w-[60px] num" inputmode="decimal" data-in="d.wo.ex.${i}.s.${j}.kg" value="${esc(s.kg)}"><span class="ui sec">kg ×</span>
+          <input class="cell w-[48px] num" inputmode="numeric" data-in="d.wo.ex.${i}.s.${j}.reps" value="${esc(s.reps)}"><span class="ui sec flex-1">reps</span>
+          <button class="press" data-act="setDone:${i}:${j}" aria-label="Toggle set ${j+1}">${tick(s.d, SETC[Math.min(j+1,3)], 26)}</button>
+        </div>`).join('')}
+        <div class="flex items-center justify-between pt-1 gap-2">
+          <span class="ui mut truncate">${hist.length?'Before: '+hist.map(h=>`${fmtD(h.date,{day:'numeric',month:'short'})} ${h.kg}kg×${h.reps}`).join(' • '):'No earlier sessions yet'}</span>
+          <button class="lbl press shrink-0" style="color:${G}" data-act="saveDefault:${i}">Save as plan</button>
+        </div>
+      </div>`:''}
     </div>`;
-  }).join('');
+  };
+  const prim = wo.ex.map((e,i)=>[e,i]).filter(([e])=>e.g==='p'), seco = wo.ex.map((e,i)=>[e,i]).filter(([e])=>e.g!=='p');
   const workout = `
     <div class="deep p-3 flex items-center justify-between">${week}</div>
     <div class="sub p-3 space-y-2.5">
-      <div class="flex items-center justify-between">
-        <span class="sm font-semibold">${sp.tag} • ${sp.name}</span>
-        <span class="lbl" style="color:${G}" id="wo-pct"></span>
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0 flex-1">
+          <input class="bare g text-[15px] font-semibold" data-in="cfg.splits.${key}.name" value="${esc(sp.name)}" aria-label="Workout name">
+          <p class="ui sec" id="wo-why"></p>
+        </div>
+        <div class="text-center shrink-0 px-3 py-1.5 rounded-xl" id="wo-scorebox">
+          <span class="g text-[22px] font-bold num leading-6 block" id="wo-score">–</span><span class="text-[9px] leading-3 sec font-semibold">AUTO /5</span>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-1.5 text-center">
+        <div class="deep py-1.5"><p class="g text-[15px] font-bold num" id="wo-ex">0/0</p><p class="text-[9px] sec font-semibold tracking-wider">EXERCISES</p></div>
+        <div class="deep py-1.5"><p class="g text-[15px] font-bold num" id="wo-sets">0/0</p><p class="text-[9px] sec font-semibold tracking-wider">SETS</p></div>
+        <div class="deep py-1.5"><p class="g text-[15px] font-bold num" id="wo-reps">0/0</p><p class="text-[9px] sec font-semibold tracking-wider">REPS</p></div>
       </div>
       <div class="bar"><i id="wo-bar" style="background:${G};box-shadow:0 0 8px ${G}"></i></div>
-      <div class="flex items-center justify-between gap-3 pt-0.5">
-        <span class="ui sec shrink-0">Session rating</span>
-        <div class="flex gap-1.5 flex-1">${rate}</div>
+      <div class="flex gap-2">
+        <button class="flex-1 py-2 rounded-xl ui font-semibold flex items-center justify-center gap-1.5 press" data-act="woFlag:warm"
+          style="${wo.warm?`background:${G};color:#0A0A0F`:'background:#1F1F25;color:#94A3B8'}">${ic(wo.warm?'check':'flame','','width:14px;height:14px;stroke-width:2.6')} Warm-up ${esc(cfg.goals.warm)}m</button>
+        <button class="flex-1 py-2 rounded-xl ui font-semibold flex items-center justify-center gap-1.5 press" data-act="woFlag:stretch"
+          style="${wo.stretch?`background:${G};color:#0A0A0F`:'background:#1F1F25;color:#94A3B8'}">${ic(wo.stretch?'check':'wind','','width:14px;height:14px;stroke-width:2.6')} Stretch ${esc(cfg.goals.stretch)}m</button>
       </div>
     </div>
-    <div class="grid grid-cols-2 gap-2">${ex}</div>`;
+    ${key==='rest'?`<div class="sub p-3 sm sec">Sunday is rest + recovery. Log a warm-up / mobility or a home workout below if you did one.</div>`:''}
+    ${prim.length?`<div class="flex items-center justify-between px-1"><span class="lbl" style="color:${G}">${esc(sp.p)} • ${prim.length}</span>
+      <span class="ui mut flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background:${SETC[1]}"></span>1 <span class="w-2 h-2 rounded-full" style="background:${SETC[2]}"></span>2 <span class="w-2 h-2 rounded-full" style="background:${SETC[3]}"></span>3 sets</span></div>
+      <div class="space-y-1.5">${prim.map(([e,i])=>exRow(e,i)).join('')}</div>`:''}
+    ${seco.length?`<div class="flex items-center justify-between px-1 pt-1"><span class="lbl" style="color:#84CC16">${esc(sp.s)} • ${seco.length}</span><span class="ui mut">Tap circle = +1 set</span></div>
+      <div class="space-y-1.5">${seco.map(([e,i])=>exRow(e,i)).join('')}</div>`:''}
+    <div class="deep p-3 space-y-2">
+      <div class="flex items-center gap-2">${ic('home','','width:16px;height:16px;color:#94A3B8')}<span class="sm font-semibold">Gym off? Home workout</span></div>
+      <div class="flex items-center gap-2">
+        <input class="cell w-[64px] num" inputmode="numeric" data-in="d.wo.push" value="${esc(wo.push)}" placeholder="0"><span class="ui sec">push-ups</span>
+        <input class="cell w-[64px] num ml-2" inputmode="numeric" data-in="d.wo.squat" value="${esc(wo.squat)}" placeholder="0"><span class="ui sec">squats</span>
+      </div>
+    </div>`;
 
-  const drops = WATER.map((ml,i)=>{ const on = state.water.includes(i);
-    return `<button class="flex flex-col items-center gap-0.5 press" data-act="water:${i}" aria-label="${ml} ml">
-      ${ic('drop',on?'fill':'',`width:${ml===750?26:ml===500?23:20}px;height:${ml===750?26:ml===500?23:20}px;color:${on?G:'#35343a'}`)}
-      <span class="text-[9px] leading-3 num" style="color:${on?G:'#64748B'}">${ml}</span></button>`; }).join('');
-  const meals = MEALS.map(([tm,name],i)=>{ const on = !!state.meals[i];
-    return `<div class="sub p-2.5 flex items-center gap-2.5">
-      <button class="press" data-act="meal:${i}" aria-label="Toggle ${name}">${tick(on,G)}</button>
-      <div class="flex-1 min-w-0">
-        <span class="g text-[13px] font-medium num">${t12(tm)} • ${name}</span>
-        <input class="bare ui sec block mt-0.5" data-in="mealTxt.${i}" value="${esc(state.mealTxt[i]||'')}" placeholder="What did you eat?">
+  // ---------- diet + hydration ----------
+  const ds = dietStats(date);
+  const cust = ui.custom ? `<div class="flex gap-2 items-center">
+      <input class="well px-3 py-2 sm num" inputmode="numeric" id="custom-ml" placeholder="ml, e.g. 350">
+      <button class="px-4 py-2 rounded-xl lbl press shrink-0" style="background:#38BDF8;color:#0A0A0F" data-act="customAdd">Add</button></div>` : '';
+  const pill = (act, label, size) => `<button class="w-full h-[50px] rounded-full flex items-center gap-2.5 px-3.5 press" data-act="${act}"
+      style="background:linear-gradient(180deg,rgba(56,189,248,.16),rgba(14,165,233,.06));border:1px solid rgba(125,211,252,.35);box-shadow:0 0 14px rgba(56,189,248,.15)">
+      ${ic('drop','fill',`width:${size}px;height:${size}px;color:#38BDF8`)}<span class="w-px h-6" style="background:rgba(255,255,255,.15)"></span><span class="g text-[16px] font-bold whitespace-nowrap">${label}</span></button>`;
+  const drinks = d.water.map((w,k)=>`<button class="px-2 py-1 rounded-lg ui flex items-center gap-1 press" style="background:#0E2233;color:#7DD3FC" data-act="unwater:${k}" aria-label="Remove this drink">${num(w.ml)}ml${w.t?` • ${t12(w.t)}`:''} ${ic('x','','width:11px;height:11px')}</button>`).join('');
+  const meals = cfg.meals.map((m,i)=>{ const r = d.meals[i]||{}, st = mealStat(date,i);
+    const chip = st.k==='pending' ? ['Pending','#64748B'] : st.k==='late' ? ['Late '+hm2(st.diff),'#F97316'] : st.k==='early' ? ['Early '+hm2(st.diff),'#38BDF8'] : ['On time','#22C55E'];
+    return `<div class="sub p-2.5 space-y-1.5">
+      <div class="flex items-center gap-2.5">
+        <button class="press" data-act="meal:${i}" aria-label="Toggle ${esc(m.n)}">${tick(r.d,G)}</button>
+        <div class="flex-1 min-w-0"><span class="g text-[13px] font-semibold block truncate">${esc(m.n)}</span><span class="ui mut num">Ideal ${t12(m.t)}</span></div>
+        <span class="chip shrink-0" style="color:${chip[1]};background:${chip[1]}1A">${chip[0]}</span>
       </div>
-      <span class="lbl shrink-0" style="color:${on?G:'#64748B'}">${on?'Logged':'Pending'}</span>
+      <div class="flex items-center gap-2 pl-[32px]">
+        <span class="ui sec shrink-0">Ate at</span>
+        <input type="time" class="cell w-[108px] num" data-in="d.meals.${i}.at" value="${esc(r.at||'')}">
+        <input class="cell flex-1 text-left" data-in="d.meals.${i}.q" value="${esc(r.q||'')}" placeholder="Qty (2 roti, 150g)">
+      </div>
+      <input class="bare ui sec block pl-[32px]" data-in="d.meals.${i}.f" value="${esc(r.f||'')}" placeholder="What did you eat?">
     </div>`; }).join('');
+  const wk = weekDiet(date);
   const diet = `
-    <div class="sub p-3 space-y-2">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-1.5">${ic('drop','',`width:16px;height:16px;color:${G}`)}<span class="sm font-semibold">Hydration Tracker</span></div>
-        <span class="lbl sec num" id="water-stat"></span>
+    <div class="deep p-3 space-y-2">
+      <div class="flex items-center justify-between gap-2"><span class="sm font-semibold">Today's Intake</span>
+        <span class="num"><b class="g text-[20px]" style="color:#38BDF8" id="water-l"></b><span class="sec sm"> / ${(ds.target/1000).toFixed(1)} L</span></span>
+        <span class="chip num" style="color:#38BDF8;background:#38BDF81A" id="water-pct"></span></div>
+      <div class="bar"><i id="water-bar" style="background:#38BDF8;box-shadow:0 0 10px #38BDF8"></i></div>
+      <div class="flex items-end gap-2 pt-1">
+        <div class="flex-1 min-w-0" id="jar">${jarSVG(ds.water, ds.target)}</div>
+        <button class="w-[40px] shrink-0 flex flex-col items-center gap-1 press" data-act="creatine" aria-label="Toggle creatine">${tubeSVG(d.cre)}
+          <span class="text-[8px] leading-3 font-bold text-center" style="color:${d.cre?G:'#64748B'}">CREATINE<br>${d.cre?(d.creT?t12(d.creT):'TAKEN'):'5 G'}</span></button>
+        <div class="w-[40%] shrink-0 space-y-2">
+          ${pill('water:1000','1 L',22)}${pill('water:500','500 ml',18)}${pill('water:250','250 ml',15)}
+          <button class="w-full h-[50px] rounded-full flex items-center gap-2.5 px-3.5 press" data-act="customToggle"
+            style="background:linear-gradient(180deg,rgba(129,140,248,.18),rgba(129,140,248,.06));border:1px solid rgba(165,180,252,.4)">
+            ${ic('sliders','','width:20px;height:20px;color:#C7D2FE')}<span class="w-px h-6" style="background:rgba(255,255,255,.15)"></span><span class="g text-[14px] font-bold">Custom</span></button>
+        </div>
       </div>
-      <div class="flex items-end justify-between pt-1 px-0.5">${drops}</div>
+      ${cust}
+      ${drinks?`<div class="flex flex-wrap gap-1.5 pt-1">${drinks}</div>`:`<p class="ui mut">Tap a button each time you drink. Tap the tube when you take creatine.</p>`}
     </div>
+    <div class="flex items-center justify-between px-1"><span class="lbl" style="color:${G}">Meals • ideal vs actual</span><span class="ui mut">Late after ${esc(cfg.goals.lateMin)} min</span></div>
     <div class="space-y-1.5">${meals}</div>
     <div class="deep p-2.5 flex items-center justify-between gap-2">
-      <div class="flex items-center gap-2 min-w-0">${ic('pill','',`width:18px;height:18px;color:${G}`)}<span class="sm">Creatine Monohydrate (5g)</span></div>
-      <button class="px-3 py-1 rounded-full lbl flex items-center gap-1 press shrink-0" data-act="creatine"
-        style="${state.creatine?`background:${G};color:#0A0A0F;box-shadow:0 0 8px ${G}`:'background:#35343a;color:#94A3B8'}">
-        ${ic(state.creatine?'check':'circle','','width:13px;height:13px;stroke-width:3')} ${state.creatine?'Taken':'Not yet'}</button>
+      <div class="flex items-center gap-2 min-w-0">${ic('flame','',`width:18px;height:18px;color:${G}`)}<span class="sm">High-protein day</span></div>
+      <button class="px-3 py-1 rounded-full lbl press shrink-0" data-act="protein"
+        style="${d.protein?`background:${G};color:#0A0A0F`:'background:#35343a;color:#94A3B8'}">${d.protein?'Yes':'Not yet'}</button>
+    </div>
+    <div class="sub p-3 space-y-1">
+      <span class="lbl" style="color:${G}">Last 7 days</span>
+      <p class="sm">${wk.logged?`<b>${wk.ontime}/${wk.logged}</b> meals on time • water avg <b>${(wk.water/1000).toFixed(1)}L</b> • protein <b>${wk.protein}/7</b> days`:'No meals logged in the last 7 days'}</p>
+      ${wk.worst?`<p class="ui" style="color:#F97316">Most delayed: ${esc(wk.worst.n)} (late ${wk.worst.late}×, avg +${hm2(wk.worst.avg)})</p>`:''}
     </div>
     <div class="space-y-1.5">
       <span class="lbl sec">Cheat / junk note</span>
-      <textarea class="well p-2.5 sm" rows="2" data-in="cheat" placeholder="Anything off-plan today?">${esc(state.cheat)}</textarea>
+      <textarea class="well p-2.5 sm" rows="2" data-in="d.cheat" placeholder="Anything off-plan today?">${esc(d.cheat)}</textarea>
     </div>`;
 
-  const tiles = MOVERS.map(([k,short,sub,icon])=>{ const on = state.movers[k];
+  // ---------- movers ----------
+  const tiles = MOVERS.map(([k,short,,icon])=>{ const on = d.mv[k];
     return `<button class="p-2 rounded-xl flex flex-col items-center text-center gap-1 press" data-act="mover:${k}"
       style="background:${on?'#1F1F25':'#0E0E13'};border:1px solid ${on?G+'40':'rgba(255,255,255,.05)'}">
       <span class="g text-[13px] font-bold" style="color:${on?G:'#94A3B8'}">${k}</span>
@@ -517,7 +704,7 @@ function vHealth(){
       <span class="text-[10px] leading-3 sec truncate w-full">${short}</span>
       <span class="w-1.5 h-1.5 rounded-full" style="background:${on?G:'#35343a'};${on?`box-shadow:0 0 6px ${G}`:''}"></span>
     </button>`; }).join('');
-  const pending = MOVERS.filter(m=>!state.movers[m[0]]);
+  const pending = MOVERS.filter(m=>!d.mv[m[0]]);
   const movers = `
     <div class="grid grid-cols-5 gap-1.5">${tiles}</div>
     <div class="deep p-2.5 flex items-center justify-between gap-2">
@@ -525,28 +712,35 @@ function vHealth(){
       ${pending.length?`<button class="lbl press shrink-0" style="color:${G}" data-act="qMover">Quick complete</button>`:ic('checkc','',`color:${G}`)}
     </div>`;
 
-  const tl = TL.map(([tm,label],i)=>{ const on = !!state.tl[i], last = i===TL.length-1;
+  // ---------- sleep + routine ----------
+  const prevDate = addDays(date,-1), prev = state.days[prevDate];
+  const tl = cfg.tl.map(([tm,label],i)=>{ const on = !!d.tl[i], last = i===cfg.tl.length-1;
     return `<button class="w-full flex items-stretch gap-3 text-left press" data-act="tl:${i}">
       <div class="flex flex-col items-center w-5 shrink-0">
         <span class="block w-3.5 h-3.5 rounded-full mt-1 shrink-0" style="background:${on?G:'#0A0A0F'};border:2px solid ${on?G:'#3F3F46'};${on?`box-shadow:0 0 6px ${G}`:''}"></span>
         ${last?'':`<span class="block w-px flex-1 my-0.5" style="background:${on?G+'66':'#27272A'}"></span>`}
       </div>
       <div class="flex-1 flex items-center justify-between pb-2.5 gap-2">
-        <span class="sm ${on?'strike':''}">${label}</span>
+        <span class="sm ${on?'strike':''}"><span class="mut num mr-1">${i+1}.</span>${esc(label)}</span>
         <span class="lbl num shrink-0" style="color:${on?G:'#64748B'}">${t12(tm)}</span>
       </div></button>`; }).join('');
   const sleep = `
     <div class="grid grid-cols-2 gap-2">
       <label class="sub p-3 space-y-1 block">
-        <span class="ui sec flex items-center justify-between">Slept at ${ic('moon','',`width:15px;height:15px;color:${G}`)}</span>
-        <input type="time" class="bare g text-[17px] font-semibold num" data-in="sleep.at" value="${state.sleep.at}">
-        <span class="lbl" style="font-size:10px;color:${G}">Target 22:59</span>
+        <span class="ui sec flex items-center justify-between">1 • Woke up ${ic('sun','','width:15px;height:15px;color:#F59E0B')}</span>
+        <input type="time" class="bare g text-[18px] font-semibold num" data-in="d.sleep.wake" value="${esc(d.sleep.wake)}">
+        <span class="lbl block" style="font-size:10px" id="wake-ok"></span>
       </label>
       <label class="sub p-3 space-y-1 block">
-        <span class="ui sec flex items-center justify-between">Woke at ${ic('sun','','width:15px;height:15px;color:#F59E0B')}</span>
-        <input type="time" class="bare g text-[17px] font-semibold num" data-in="sleep.wake" value="${state.sleep.wake}">
-        <span class="lbl sec num" style="font-size:10px" id="sleep-win"></span>
+        <span class="ui sec flex items-center justify-between">2 • Sleep tonight ${ic('moon','','width:15px;height:15px;color:#818CF8')}</span>
+        <input type="time" class="bare g text-[18px] font-semibold num" data-in="d.sleep.slept" value="${esc(d.sleep.slept)}">
+        <span class="lbl block" style="font-size:10px" id="sleep-ok"></span>
       </label>
+    </div>
+    <div class="deep p-3 flex items-center justify-between gap-2">
+      <div class="min-w-0"><p class="ui sec">Slept last night (${fmtD(prevDate,{weekday:'short',day:'numeric'})})</p>
+        <input type="time" class="bare g text-[15px] font-semibold num" data-in="prev.sleep.slept" value="${esc(prev?.sleep?.slept||'')}"></div>
+      <div class="text-right shrink-0"><p class="g text-[22px] font-bold num" id="sleep-hrs">—</p><p class="text-[9px] sec font-semibold tracking-wider">HOURS SLEPT</p></div>
     </div>
     <div class="sub p-3">
       <div class="flex items-center justify-between mb-3"><span class="sm font-semibold">Daily Routine Timeline</span><span class="lbl num" style="color:${G}" id="tl-count"></span></div>
@@ -556,25 +750,75 @@ function vHealth(){
   return `
   <div class="glass px-4 py-3 flex items-center justify-between gap-2" style="border-radius:16px">
     <div class="flex items-center gap-2.5 min-w-0">${ic('film','',`color:${G}`)}
-      <div class="min-w-0"><span class="g text-[13px] font-semibold block truncate">${sp.tag} • ${sp.name}</span><span class="ui sec truncate block">"Living beyond the charted"</span></div>
+      <div class="min-w-0"><span class="g text-[13px] font-semibold block truncate">${esc(sp.name)}</span><span class="ui sec truncate block">"Living beyond the charted"</span></div>
     </div>
     <span class="chip num" style="color:${G}" id="live-pct"></span>
   </div>
   <div class="grid grid-cols-4 gap-2">${ring('r-w','Workout')}${ring('r-d','Diet')}${ring('r-m','Movers')}${ring('r-s','Sleep')}</div>
-  ${acc('workout','dumbbell',G,'Workout Session',{text:`${sp.name} • Week ${isoWeek(t)}`},'b-wo',workout)}
+  ${acc('workout','dumbbell',G,'Workout Session',{id:'wo-sub'},'b-wo',workout)}
   ${acc('diet','food',G,'Diet & Hydration',{id:'diet-sub'},'b-diet',diet)}
   ${acc('movers','lotus',G,'M.O.V.E.R.S. Ritual',{id:'mov-sub'},'b-mov',movers)}
-  ${acc('sleep','moon',G,'Sleep Optimization',{id:'sleep-sub'},'b-sleep',sleep)}`;
+  ${acc('sleep','moon',G,'Sleep & Routine',{id:'sleep-sub'},'b-sleep',sleep)}`;
 }
-function isoWeek(s){ const d=parseD(s); d.setDate(d.getDate()+3-((d.getDay()+6)%7)); const w1=new Date(d.getFullYear(),0,4);
-  return 1+Math.round(((d-w1)/864e5-3+((w1.getDay()+6)%7))/7); }
+function jarSVG(ml, target){
+  const f = Math.max(0, Math.min(1, ml/target)), bot = 236, H = 172, y = (bot - H*f).toFixed(1);
+  const ticks = [0,1,2,3,4].map(k=>{ const ty = bot - H*k/4, v = target/4*k;
+    return `<line x1="100" x2="${k%4===0?118:114}" y1="${ty}" y2="${ty}" stroke="#E0F2FE" stroke-width="2" stroke-opacity=".85"/>
+      <text x="122" y="${ty+4}" fill="#E0F2FE" font-size="12" font-family="Space Grotesk, sans-serif" font-weight="700">${k?(v/1000)+' L':'0'}</text>
+      ${k<4?`<line x1="100" x2="108" y1="${ty-H/8}" y2="${ty-H/8}" stroke="#E0F2FE" stroke-width="1.5" stroke-opacity=".5"/>`:''}`; }).join('');
+  return `<svg viewBox="0 0 170 252" class="w-full h-auto" role="img" aria-label="Water jar: ${ml} of ${target} ml">
+    <defs>
+      <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38BDF8" stop-opacity=".95"/><stop offset="1" stop-color="#0369A1" stop-opacity=".9"/></linearGradient>
+      <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E0B17E"/><stop offset="1" stop-color="#9C6537"/></linearGradient>
+      <clipPath id="jc"><rect x="14" y="46" width="142" height="198" rx="28"/></clipPath>
+    </defs>
+    <rect x="14" y="46" width="142" height="198" rx="28" fill="rgba(56,189,248,.07)" stroke="rgba(186,230,253,.5)" stroke-width="2"/>
+    <g clip-path="url(#jc)">
+      ${f>0?`<g class="wave"><path d="M-170 ${y} q21 -7 42 0 t42 0 t42 0 t42 0 t42 0 t42 0 t42 0 t42 0 t42 0 V260 H-170 Z" fill="url(#wg)"/></g>
+      <circle class="bub" cx="40" cy="232" r="3" fill="#E0F2FE" style="animation-delay:.2s"/><circle class="bub" cx="66" cy="236" r="2" fill="#E0F2FE" style="animation-delay:1.4s"/><circle class="bub" cx="54" cy="228" r="2.5" fill="#E0F2FE" style="animation-delay:2.6s"/>`:''}
+    </g>
+    <rect x="24" y="62" width="7" height="164" rx="3.5" fill="#fff" opacity=".12"/>
+    ${ticks}
+    <rect x="26" y="40" width="118" height="10" rx="3" fill="rgba(186,230,253,.25)"/>
+    <rect x="18" y="12" width="134" height="30" rx="9" fill="url(#wood)"/>
+    <rect x="18" y="12" width="134" height="7" rx="4" fill="#fff" opacity=".2"/>
+    <text x="56" y="84" fill="#F8FAFC" font-size="22" font-family="Space Grotesk, sans-serif" font-weight="700" text-anchor="middle">${target/1000} L</text>
+    <text x="56" y="100" fill="#BAE6FD" font-size="10" font-family="Inter, sans-serif" text-anchor="middle">(${target} ml)</text>
+  </svg>`;
+}
+function tubeSVG(on){
+  return `<svg viewBox="0 0 40 200" class="w-full h-auto" aria-hidden="true">
+    <defs><linearGradient id="tg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#16A34A"/><stop offset=".5" stop-color="#4ADE80"/><stop offset="1" stop-color="#16A34A"/></linearGradient></defs>
+    <rect x="8" y="4" width="24" height="12" rx="4" fill="${on?'#22C55E':'#3F3F46'}"/>
+    <rect x="9" y="18" width="22" height="176" rx="11" fill="rgba(255,255,255,.04)" stroke="${on?'#4ADE80':'rgba(255,255,255,.28)'}" stroke-width="2"/>
+    ${on?`<rect x="12" y="24" width="16" height="166" rx="8" fill="url(#tg)"/>`:''}
+    <rect x="12" y="26" width="4" height="150" rx="2" fill="#fff" opacity=".15"/>
+  </svg>`;
+}
+function weekDiet(date){
+  let logged = 0, ontime = 0, water = 0, protein = 0; const late = {};
+  for(let k=0;k<7;k++){ const ds = addDays(date,-k), d = peek(ds); water += d.water.reduce((a,w)=>a+num(w.ml),0); if(d.protein) protein++;
+    cfg.meals.forEach((m,i)=>{ const s = mealStat(ds,i); if(s.k==='pending') return; logged++; if(s.k==='late'){ late[i] = late[i]||{n:m.n,late:0,sum:0}; late[i].late++; late[i].sum += s.diff; } else ontime++; }); }
+  const worst = Object.values(late).sort((a,b)=>b.late-a.late||b.sum-a.sum)[0];
+  return { logged, ontime, water:water/7, protein, worst: worst ? { ...worst, avg: worst.sum/worst.late } : null };
+}
+function exHistory(name, before){
+  const out = [];
+  Object.keys(state.days).filter(k=>k<before).sort().reverse().forEach(k=>{
+    const e = state.days[k].wo?.ex?.find(x=>x.n===name); if(!e) return;
+    const dn = e.s.filter(s=>s.d); if(!dn.length) return;
+    const top = [...dn].sort((a,b)=>num(b.kg)-num(a.kg)||num(b.reps)-num(a.reps))[0];
+    out.push({ date:k, kg:num(top.kg), reps:num(top.reps) });
+  });
+  return out;
+}
 
 /* =====================================================================
    TAB 2 — WEALTH
    ===================================================================== */
 function vWealth(){
-  const A = ZONE.wealth, t = today();
-  const kpi = (key,label,icon,unit,sub) => `
+  const A = '#F59E0B', t = today(), d = day(ui.date);
+  const kpi = (key,label,unit,sub,bind) => `
     <div class="glass p-4 flex flex-col gap-2 relative overflow-hidden" style="border-radius:18px">
       <div class="absolute top-0 right-0 w-16 h-16 rounded-bl-full pointer-events-none" style="background:${A}0D"></div>
       <div class="flex items-start justify-between gap-1">
@@ -583,7 +827,7 @@ function vWealth(){
       </div>
       <div class="flex items-baseline gap-1 min-w-0">
         ${unit==='₹'?`<span class="g text-[24px] font-bold" style="color:${A}">₹</span>`:''}
-        <input class="bare g text-[26px] leading-8 font-bold num" style="letter-spacing:-.02em" inputmode="decimal" data-in="kpi.${key}" value="${esc(state.kpi[key])}" placeholder="0">
+        <input class="bare g text-[26px] leading-8 font-bold num" style="letter-spacing:-.02em" inputmode="decimal" data-in="${bind}" value="${esc(key==='dw'?d.dw:cfg.kpi[key])}" placeholder="0">
         ${unit!=='₹'?`<span class="ui sec shrink-0">${unit}</span>`:''}
       </div>
       <span class="ui sec num -mt-1" id="k-${key}-sub">${sub}</span>
@@ -591,8 +835,8 @@ function vWealth(){
       <div class="flex items-center justify-between"><span class="lbl num" style="color:${A}" id="k-${key}-pct">0%</span><span class="lbl sec">Target</span></div>
     </div>`;
   const cbDay = dayDiff(CB_START, t)+1;
-  const ms = CB_MS.map((m,i)=>{ const on = !!state.checks['cb'+i];
-    return `<button class="w-full p-2.5 sub flex items-center gap-2.5 text-left press" data-act="chk:cb${i}">
+  const ms = CB_MS.map((m,i)=>{ const on = !!cfg.wk['cb'+i];
+    return `<button class="w-full p-2.5 sub flex items-center gap-2.5 text-left press" data-act="wk:cb${i}">
       ${on?ic('checkc','',`color:${A}`):ic('circle','','color:#64748B')}
       <span class="sm flex-1 ${on?'strike':''}">${m}</span>
       <span class="lbl shrink-0" style="color:${on?A:'#64748B'}">${on?'Done':'M'+(i+1)}</span></button>`; }).join('');
@@ -605,30 +849,30 @@ function vWealth(){
       </div>
       <button class="w-7 h-7 flex items-center justify-center press shrink-0" data-act="delClient:${i}" aria-label="Remove client">${ic('x','','width:16px;height:16px;color:#64748B')}</button>
     </div>`).join('');
-  const goals = [0,1,2].map(i=>{ const on = !!state.checks['g'+i];
+  const goals = [0,1,2].map(i=>{ const on = !!cfg.wk['g'+i];
     return `<div class="sub p-3 flex items-center gap-3">
-      <button class="press" data-act="chk:g${i}" aria-label="Toggle goal">${box(on,A)}</button>
-      <input class="bare sm flex-1 ${on?'strike':''}" data-in="inlines.wg${i}" value="${esc(state.inlines['wg'+i])}" placeholder="Weekly goal ${i+1}">
+      <button class="press" data-act="wk:g${i}" aria-label="Toggle goal">${box(on,A)}</button>
+      <input class="bare sm flex-1 ${on?'strike':''}" data-in="cfg.wg.${i}" value="${esc(cfg.wg[i])}" placeholder="Weekly goal ${i+1}">
     </div>`; }).join('');
-  const goalsDone = [0,1,2].filter(i=>state.checks['g'+i]).length;
+  const goalsDone = [0,1,2].filter(i=>cfg.wk['g'+i]).length;
 
   return `
   <div class="w-full relative overflow-hidden glass p-4" style="border-radius:18px;background:linear-gradient(90deg,rgba(42,41,47,.9),rgba(28,28,38,.85),rgba(14,14,19,.9))">
     <div class="absolute -right-6 -bottom-6 w-28 h-28 rounded-full blur-2xl pointer-events-none" style="background:${A}1A"></div>
     <div class="flex items-center justify-between relative">
       <div><div class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full" style="background:${A}"></span><span class="lbl" style="color:${A}">Operating Cockpit</span></div>
-        <p class="g text-[20px] leading-7 font-semibold mt-0.5">Living beyond the charted</p></div>
+        <p class="g text-[20px] leading-7 font-semibold mt-0.5">Clarity on every rupee</p></div>
       <span class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#35343a;color:${A}">${ic('trend')}</span>
     </div>
   </div>
+  ${vTasks()}
   <div class="grid grid-cols-2 gap-2.5">
-    ${kpi('earning','Monthly Earning','trend','₹','of ₹1,00,000 goal')}
-    ${kpi('bank','Bank Balance','bank','₹','of ₹1,50,000 reserve')}
-    ${kpi('clients','Active Clients','users','/ 35','Direct mandates')}
-    ${kpi('dw','Deep Work','clock','/ 5h','Today’s focused hours')}
+    ${kpi('earning','Monthly Earning','₹','of ₹1,00,000 goal','cfg.kpi.earning')}
+    ${kpi('bank','Bank Balance','₹','of ₹1,50,000 reserve','cfg.kpi.bank')}
+    ${kpi('clients','Active Clients','/ 35','Direct mandates','cfg.kpi.clients')}
+    ${kpi('dw','Deep Work','/ 5h','Focused hours this day','d.dw')}
   </div>
-
-  <section class="glass p-4 space-y-3 relative overflow-hidden" style="box-shadow:0 4px 24px rgba(245,158,11,.1),inset 0 1px 0 rgba(255,255,255,.06)">
+  <section class="glass p-4 space-y-3 relative overflow-hidden">
     <div class="flex items-start justify-between gap-2">
       <div class="min-w-0">
         <div class="flex items-center gap-1.5">${ic('cal','',`width:16px;height:16px;color:${A}`)}<span class="lbl" style="color:${A}">365-Day Odyssey Tracker</span></div>
@@ -640,15 +884,8 @@ function vWealth(){
       <div class="flex items-center justify-between"><span class="ui">Started 28 Oct 2026</span><span class="lbl num" style="color:${A}">${(Math.max(0,Math.min(cbDay,365))/365*100).toFixed(1)}% of Year 1</span></div>
       <div class="bar"><i style="width:${Math.max(0,Math.min(cbDay,365))/365*100}%;background:${A};box-shadow:0 0 8px ${A};min-width:6px"></i></div>
     </div>
-    <div class="rounded-xl p-4 relative overflow-hidden" style="background:radial-gradient(120% 140% at 85% 0%, ${A}33, transparent 55%),linear-gradient(160deg,#1C1C26,#0E0E13);border:1px solid rgba(255,255,255,.06)">
-      <div class="flex items-end justify-between">
-        <div><span class="lbl" style="color:${A}">Milestones</span><p class="g text-[34px] leading-10 font-bold num">${CB_MS.filter((_,i)=>state.checks['cb'+i]).length}<span class="text-[17px] sec"> / 6</span></p></div>
-        <div class="text-right"><span class="lbl sec">Days left</span><p class="g text-[22px] font-bold num">${Math.max(0,365-Math.max(cbDay,0))}</p></div>
-      </div>
-    </div>
     <div class="space-y-1.5">${ms}</div>
   </section>
-
   <section class="glass p-4 space-y-3">
     <div class="flex items-center justify-between gap-2">
       <div class="flex items-center gap-2">${ic('brief','',`color:${A}`)}<h3 class="g text-[20px] leading-7 font-semibold whitespace-nowrap">Client Pipeline</h3></div>
@@ -657,7 +894,6 @@ function vWealth(){
     <div class="space-y-1.5" id="pipe-list">${clients||`<p class="ui sec px-1">No clients yet — add your first one.</p>`}</div>
     <button class="w-full py-2.5 rounded-xl lbl flex items-center justify-center gap-1.5 press" style="border:1px dashed ${A}66;color:${A}" data-act="addClient">${ic('plus','','width:16px;height:16px')} Add client</button>
   </section>
-
   <section class="glass p-4 space-y-3">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">${ic('checkc','',`color:${A}`)}<h3 class="g text-[20px] leading-7 font-semibold">Weekly Focus</h3></div>
@@ -666,32 +902,75 @@ function vWealth(){
     <div class="space-y-1.5">${goals}</div>
   </section>`;
 }
+/* Work tracker — tasks belong to a month; anything unfinished after that month shows as Overdue */
+function vTasks(){
+  const A = '#F59E0B', R = '#EF4444', cur = monthKey(today());
+  const open = t => num(t.done) < Math.max(1,num(t.qty));
+  const overdue = cfg.tasks.filter(t=>t.m<cur && open(t)).sort((a,b)=>a.m<b.m?-1:1);
+  const thisM = cfg.tasks.filter(t=>t.m===cur).sort((a,b)=>open(b)-open(a));
+  const doneThis = thisM.filter(t=>!open(t)).length;
+  const row = (t, late) => { const q = Math.max(1,num(t.qty)), dn = Math.min(num(t.done),q), fin = dn>=q, col = fin?'#22C55E':late?R:A;
+    return `<div class="sub p-2.5 flex items-center gap-2" style="${late&&!fin?`border-color:${R}55;background:${R}0F`:''}">
+      <button class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 press" data-act="taskInc:${t.id}" aria-label="Mark one done"
+        style="background:${col}1F;border:2px solid ${col};color:${col}">${fin?ic('check','','width:16px;height:16px;stroke-width:3'):`<span class="g text-[11px] font-bold num">${dn}/${q}</span>`}</button>
+      <div class="flex-1 min-w-0">
+        <p class="sm font-semibold truncate ${fin?'strike':''}">${esc(t.t)}</p>
+        <p class="ui sec truncate">${t.c?esc(t.c)+' • ':''}${esc(t.type||'Other')}${late?` • <span style="color:${R}">since ${monthShort(t.m)}</span>`:''}</p>
+      </div>
+      ${dn>0?`<button class="w-7 h-7 flex items-center justify-center press shrink-0" data-act="taskDec:${t.id}" aria-label="Undo one">${ic('undo','','width:15px;height:15px;color:#64748B')}</button>`:''}
+      <button class="w-7 h-7 flex items-center justify-center press shrink-0" data-act="taskDel:${t.id}" aria-label="Delete task">${ic('trash','','width:15px;height:15px;color:#64748B')}</button>
+    </div>`; };
+  const remaining = arr => arr.reduce((a,t)=>a+Math.max(0,Math.max(1,num(t.qty))-num(t.done)),0);
+  const months = []; for(let k=-3;k<=1;k++){ const d = new Date(); d.setDate(1); d.setMonth(d.getMonth()+k); months.push(ymd(d).slice(0,7)); }
+  const f = ui.taskForm || { m:cur, type:'Video edit', qty:1 };
+  return `<section class="glass p-4 space-y-3">
+    <div class="flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2">${ic('video','',`color:${A}`)}<h3 class="g text-[20px] leading-7 font-semibold">Work Tracker</h3></div>
+      <span class="lbl num" style="color:${A}">${doneThis}/${thisM.length} done</span>
+    </div>
+    ${overdue.length?`<div class="rounded-xl p-3 space-y-2" style="background:${R}12;border:1px solid ${R}55">
+      <div class="flex items-center gap-2">${ic('alert','',`width:17px;height:17px;color:${R}`)}<span class="lbl" style="color:${R}">Overdue from earlier months • ${remaining(overdue)} pending</span></div>
+      <div class="space-y-1.5">${overdue.map(t=>row(t,true)).join('')}</div></div>`:''}
+    <div class="flex items-center justify-between px-1"><span class="lbl" style="color:${A}">${monthName(cur)}</span><span class="ui mut">${remaining(thisM)} left this month</span></div>
+    <div class="space-y-1.5">${thisM.length?thisM.map(t=>row(t,false)).join(''):'<p class="ui sec px-1">No tasks for this month yet.</p>'}</div>
+    <div class="deep p-3 space-y-2">
+      <input class="well px-3 py-2 sm" id="tf-t" data-draft="taskT" placeholder="Task (e.g. Anshika EP04 edit, Invoice Garima)">
+      <div class="grid grid-cols-2 gap-2">
+        <input class="well px-3 py-2 sm" id="tf-c" data-draft="taskC" placeholder="Client">
+        <select class="well px-3 py-2 sm" id="tf-type">${TASK_TYPES.map(x=>`<option ${f.type===x?'selected':''}>${x}</option>`).join('')}</select>
+        <select class="well px-3 py-2 sm" id="tf-m">${months.map(m=>`<option value="${m}" ${f.m===m?'selected':''}>${monthShort(m)}</option>`).join('')}</select>
+        <div class="flex items-center gap-2"><span class="ui sec shrink-0">How many</span><input class="well px-3 py-2 sm num" id="tf-q" inputmode="numeric" value="${esc(f.qty)}"></div>
+      </div>
+      <button class="w-full py-2.5 rounded-xl lbl flex items-center justify-center gap-1.5 press" style="background:${A};color:#0A0A0F" data-act="taskAdd">${ic('plus','','width:15px;height:15px;stroke-width:2.6')} Add task</button>
+      <p class="ui mut">Choose an earlier month to log old pending work. Anything unfinished when a month ends moves to Overdue automatically.</p>
+    </div>
+  </section>`;
+}
 
 /* =====================================================================
    TAB 3 — HAPPINESS
    ===================================================================== */
 function vHappy(){
-  const P = ZONE.happy;
-  const ct = CONTENT.map(([label,icon],i)=>{ const on = !!state.checks['ct'+i];
-    return `<button class="w-full sub p-3 flex items-center gap-3 text-left press" data-act="chk:ct${i}">
+  const P = '#818CF8', d = day(ui.date);
+  const ct = CONTENT.map(([label,icon],i)=>{ const on = !!d.ct[i];
+    return `<button class="w-full sub p-3 flex items-center gap-3 text-left press" data-act="ct:${i}">
       ${tick(on,P)}<span class="sm flex-1 ${on?'strike':''}">${label}</span>${ic(icon,'',`width:18px;height:18px;color:${on?P:'#64748B'}`)}</button>`; }).join('');
-  const ctDone = CONTENT.filter((_,i)=>state.checks['ct'+i]).length;
-  const ps = PASSION.map(([label,icon,key,ph],i)=>{ const on = !!state.checks['ps'+i];
+  const ctDone = CONTENT.filter((_,i)=>d.ct[i]).length;
+  const ps = PASSION.map(([label,icon,key,ph],i)=>{ const on = !!d.ps[i];
     return `<div class="sub p-3 space-y-1.5">
       <div class="flex items-center justify-between gap-2">
         <div class="flex items-center gap-2">${ic(icon,'',`width:18px;height:18px;color:${P}`)}<span class="g text-[15px] font-semibold">${label}</span></div>
         <button class="press" data-act="ps:${i}" aria-label="Toggle ${label}">${tick(on,P)}</button>
       </div>
-      <input class="bare sm sec" data-in="inlines.${key}" value="${esc(state.inlines[key])}" placeholder="${ph}">
+      <input class="bare sm sec" data-in="d.txt.${key}" value="${esc(d.txt[key])}" placeholder="${ph}">
     </div>`; }).join('');
-  const psDone = PASSION.filter((_,i)=>state.checks['ps'+i]).length;
+  const psDone = PASSION.filter((_,i)=>d.ps[i]).length;
   const filters = ['All',...TAGS.map(t=>t[0])].map(f=>{
     const col = f==='All'?'#F8FAFC':TAGS.find(t=>t[0]===f)[1], on = ui.noteFilter===f;
     const n = f==='All'?state.notes.length:state.notes.filter(x=>x.tag===f).length;
     return `<button class="px-3 py-1 rounded-full ui shrink-0 press" data-act="nf:${f}" style="background:${on?col+'26':'#1B1B20'};color:${on?col:'#94A3B8'};border:1px solid ${on?col+'55':'transparent'}">${f} (${n})</button>`; }).join('');
-  const composerTags = TAGS.map(([tg,col])=>{ const on = ui.noteTag===tg;
+  const composerTags = TAGS.filter(t=>t[0]!=='Journal').map(([tg,col])=>{ const on = ui.noteTag===tg;
     return `<button class="px-2.5 py-1 rounded-full ui press" data-act="nt:${tg}" style="background:${on?col:'#1B1B20'};color:${on?'#0A0A0F':col}">${tg}</button>`; }).join('');
-
   return `
   <div class="glass p-4 relative overflow-hidden" style="border-radius:18px;background:linear-gradient(90deg,rgba(42,41,47,.9),rgba(28,28,38,.85),rgba(14,14,19,.9))">
     <div class="absolute -right-6 -top-6 w-28 h-28 rounded-full blur-2xl pointer-events-none" style="background:${P}26"></div>
@@ -701,7 +980,6 @@ function vHappy(){
       <span class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#35343a;color:${P}">${ic('spark')}</span>
     </div>
   </div>
-
   <section class="glass p-4 space-y-3">
     <div class="flex items-start justify-between gap-2">
       <div class="flex items-start gap-2.5">${ic('video','mt-1',`color:${P}`)}
@@ -711,10 +989,9 @@ function vHappy(){
     <div class="space-y-1.5">${ct}</div>
     <div class="space-y-1.5 pt-1">
       <span class="lbl sec">Content idea</span>
-      <textarea class="well p-3 sm" rows="3" data-in="contentIdea" placeholder="Hook, location, shot list…">${esc(state.contentIdea)}</textarea>
+      <textarea class="well p-3 sm" rows="3" data-in="cfg.idea" placeholder="Hook, location, shot list…">${esc(cfg.idea)}</textarea>
     </div>
   </section>
-
   <section class="glass p-4 space-y-3">
     <div class="flex items-start justify-between gap-2">
       <div><h2 class="g text-[20px] leading-7 font-semibold">Daily Mind &amp; Craft</h2><p class="ui sec">Passion tracker • inputs shaping your art</p></div>
@@ -722,7 +999,6 @@ function vHappy(){
     </div>
     <div class="space-y-1.5">${ps}</div>
   </section>
-
   <section class="space-y-3 pt-1">
     <div class="flex items-center justify-between px-1">
       <div class="flex items-center gap-1.5"><h2 class="g text-[20px] leading-7 font-semibold">Brain Dump &amp; Log</h2><span class="w-1.5 h-1.5 rounded-full" style="background:${P}"></span></div>
@@ -730,19 +1006,19 @@ function vHappy(){
     </div>
     <div class="flex gap-2 overflow-x-auto pb-1">${filters}</div>
     <div class="glass p-3 space-y-2">
-      <textarea id="note-text" class="well p-3 sm" rows="2" placeholder="Capture a thought…"></textarea>
+      <textarea id="note-text" data-draft="note" class="well p-3 sm" rows="2" placeholder="Capture a thought or idea…"></textarea>
       <div class="flex items-center justify-between gap-2">
         <div class="flex gap-1.5 flex-wrap">${composerTags}</div>
         <button class="px-3.5 py-1.5 rounded-lg lbl press shrink-0" style="background:${P};color:#0A0A0F" data-act="addNote">Add</button>
       </div>
     </div>
-    <div class="space-y-2.5 max-h-[560px] overflow-y-auto" id="feed">${feedHTML()}</div>
+    <div class="space-y-2.5 max-h-[560px] overflow-y-auto">${feedHTML()}</div>
   </section>`;
 }
 function feedHTML(){
   const list = state.notes.filter(n=>ui.noteFilter==='All'||n.tag===ui.noteFilter).sort((a,b)=>b.ts-a.ts);
   if(!list.length) return `<div class="glass p-5 text-center"><p class="sm sec">No notes yet. Tap + to capture one.</p></div>`;
-  return list.map(n=>{ const col = (TAGS.find(t=>t[0]===n.tag)||TAGS[3])[1], d = new Date(n.ts);
+  return list.map(n=>{ const col = (TAGS.find(t=>t[0]===n.tag)||TAGS[5])[1], d = new Date(n.ts);
     return `<article class="glass p-4 space-y-2">
       <div class="flex items-center justify-between">
         <span class="px-2 py-0.5 rounded-md ui" style="background:${col}1F;color:${col}">${esc(n.tag)}</span>
@@ -755,19 +1031,186 @@ function feedHTML(){
 }
 
 /* =====================================================================
-   TAB 4 — PROFILE
+   TAB 4 — JOURNAL (90-day reset, paper-journal habits, check-ins)
+   ===================================================================== */
+function challengeStats(){
+  const c = cfg.challenge, t = today(), len = Math.max(1,Math.round(num(c.len))||90);
+  const dayN = dayDiff(c.start, t)+1;
+  let n = 0, sl = 0, dw = 0, fi = 0;
+  for(let i=0;i<len;i++){ const ds = addDays(c.start,i); if(ds>t) break; if(!logged(ds)) continue; n++;
+    const h = habits(ds), d = peek(ds);
+    sl += ((h.wakeOk===true)+(h.sleepOk===true))/2; dw += ((d.protein===true)+(h.workout===true||h.workout==='rest'))/2; fi += d.j.wealth?1:0; }
+  const p = v => n ? Math.round(v/n*100) : 0;
+  return { dayN, len, n, sleep:p(sl), dietWorkout:p(dw), finance:p(fi) };
+}
+function vJournal(){
+  const J = '#38BDF8', date = ui.date, d = day(date), h = habits(date), c = cfg.challenge, cs = challengeStats(), len = cs.len;
+  const grid = Array.from({length:len},(_,i)=>{ const ds = addDays(c.start,i), fut = ds>today(), isV = ds===date;
+    let col = '#1F1F25';
+    if(fut) col = '#141418';
+    else if(logged(ds)){ const hh = habits(ds), r = hh.done/hh.total; col = r>=1?'#22C55E':r>=.83?'#84CC16':r>=.66?'#F59E0B':r>=.5?'#F97316':'#EF4444'; }
+    return `<button class="aspect-square rounded-[5px] press" ${fut?'disabled':''} data-act="goDate:${ds}" aria-label="${ds}" style="background:${col};${isV?'box-shadow:0 0 0 2px #F8FAFC':''}"></button>`; }).join('');
+  const bar = (label,p,col,icon) => `<div class="space-y-1">
+      <div class="flex items-center justify-between"><span class="ui flex items-center gap-1.5">${ic(icon,'',`width:14px;height:14px;color:${col}`)}${label}</span><span class="lbl num" style="color:${col}">${p}%</span></div>
+      <div class="bar"><i style="width:${p}%;background:${col}"></i></div></div>`;
+  const rate = [1,2,3,4,5].map(n=>{ const on = d.j.rate===n, col = SCORE[n];
+    return `<button class="flex-1 h-9 rounded-lg g text-[13px] font-bold press" data-act="rate:${n}" style="background:${on?col:col+'1F'};color:${on?'#0A0A0F':col}">${n}</button>`; }).join('');
+  const line = (n,label,val) => `<div class="flex items-center justify-between gap-2 py-2" style="border-bottom:1px solid rgba(255,255,255,.05)">
+      <span class="sm"><span class="mut num mr-1.5">${n}</span>${label}</span><div class="flex items-center gap-2 shrink-0">${val}</div></div>`;
+  const toggleBtn = (act,on,yes,no) => `<button class="px-3 py-1 rounded-full lbl press" data-act="${act}" style="${on?'background:#22C55E;color:#0A0A0F':'background:#35343a;color:#94A3B8'}">${on?yes:no}</button>`;
+  const w = woStats(date), mc = moverCount(date);
+
+  const per = cfg.periodic.map(p=>{
+    const hist = Object.keys(state.days).filter(k=>state.days[k].per?.[p.id]!=null && state.days[k].per[p.id]!==false).sort();
+    const last = hist[hist.length-1], next = last ? addDays(last, Math.round(num(p.every))||14) : null, left = next ? dayDiff(today(), next) : null;
+    const doneHere = d.per[p.id]!=null && d.per[p.id]!==false;
+    const status = !last ? ['Not logged yet','#94A3B8'] : left<0 ? [`Overdue by ${-left}d`,'#EF4444'] : left===0 ? ['Due today','#F59E0B'] : [`Next ${fmtD(next,{day:'numeric',month:'short'})} (in ${left}d)`,'#22C55E'];
+    let extra = '';
+    if(p.val){
+      const vals = hist.map(k=>({ date:k, v:num(state.days[k].per[p.id]) })).filter(x=>x.v>0);
+      const lastV = vals[vals.length-1], prevV = vals[vals.length-2], tgt = p.id==='weight' ? num(cfg.goals.weight) : 0;
+      const delta = lastV && prevV ? +(lastV.v - prevV.v).toFixed(1) : null;
+      extra = `<div class="flex items-center gap-2 pt-1">
+          <input class="cell w-[84px] num" inputmode="decimal" id="per-${p.id}" value="${doneHere?esc(d.per[p.id]):''}" placeholder="${lastV?lastV.v:'0'}"><span class="ui sec">${esc(p.unit)}</span>
+          <span class="ui mut">on ${fmtD(date,{day:'numeric',month:'short'})}</span>
+          <button class="ml-auto px-3 py-1.5 rounded-lg lbl press" style="background:${J};color:#0A0A0F" data-act="perSave:${p.id}">Save</button>
+        </div>
+        ${vals.length?`<div class="flex items-center justify-between gap-2 pt-1">
+          <p class="ui sec">Last ${lastV.v}${esc(p.unit)}${delta!=null?` <span style="color:${delta>0?'#F59E0B':delta<0?'#38BDF8':'#94A3B8'}">(${delta>0?'+':''}${delta} since ${fmtD(prevV.date,{day:'numeric',month:'short'})})</span>`:''}${tgt?` • target ${tgt}${esc(p.unit)} → <b>${lastV.v>tgt?'cut':lastV.v<tgt?'gain':'hold'}</b>`:''}</p>
+          ${spark(vals.slice(-10).map(x=>x.v))}</div>`:''}`;
+    }
+    return `<div class="sub p-3 space-y-1">
+      <div class="flex items-center gap-2.5">
+        <span class="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style="background:${J}1F;color:${J}">${ic(p.val?'scale':'scissor','','width:17px;height:17px')}</span>
+        <div class="flex-1 min-w-0"><p class="sm font-semibold">${esc(p.n)} <span class="ui mut">• every ${esc(p.every)} days</span></p>
+          <p class="ui" style="color:${status[1]}">${status[0]}${last?` • last ${fmtD(last,{day:'numeric',month:'short'})}`:''}</p></div>
+        ${p.val?'':`<button class="px-3 py-1.5 rounded-lg lbl press shrink-0" data-act="perToggle:${p.id}" style="${doneHere?'background:#22C55E;color:#0A0A0F':`background:${J}1F;color:${J}`}">${doneHere?'Done':'Mark done'}</button>`}
+      </div>${extra}</div>`;
+  }).join('');
+
+  return `
+  <section class="glass p-4 space-y-3 relative overflow-hidden">
+    <div class="absolute -right-8 -top-8 w-36 h-36 rounded-full blur-3xl pointer-events-none" style="background:${J};opacity:.14"></div>
+    <div class="flex items-start justify-between gap-2 relative">
+      <div><span class="lbl" style="color:${J}">${esc(c.title)}</span>
+        <p class="g text-[26px] leading-8 font-bold num">Day ${Math.max(0,Math.min(cs.dayN,len))}<span class="sec text-[15px]"> / ${len}</span></p>
+        <p class="ui sec">${cs.n} days logged • 3 outcomes</p></div>
+      <label class="text-right shrink-0"><span class="ui mut block mb-1">Started on</span>
+        <input type="date" class="cell num" style="font-size:12px" data-in="cfg.challenge.start" value="${esc(c.start)}"></label>
+    </div>
+    <div class="space-y-2.5 relative">
+      ${bar('Fix sleep routine', cs.sleep, '#818CF8', 'moon')}
+      ${bar('Fix diet + workout', cs.dietWorkout, '#22C55E', 'dumbbell')}
+      ${bar('Clarity on finances', cs.finance, '#F59E0B', 'wallet')}
+    </div>
+    <div class="grid gap-1 pt-1" style="grid-template-columns:repeat(15,minmax(0,1fr))">${grid}</div>
+    <p class="ui mut">One square per day, coloured by how many of the 6 habits you hit. Tap a square to open that day.</p>
+  </section>
+
+  <section class="glass p-4">
+    <div class="flex items-center justify-between pb-1"><div class="flex items-center gap-2">${ic('journal','',`color:${J}`)}<h3 class="g text-[18px] font-semibold">Daily Journal</h3></div>
+      <span class="chip num" style="color:${J};background:${J}1A">${h.done}/${h.total} habits</span></div>
+    ${line(1,'Wake-up time',`<input type="time" class="cell w-[100px] num" data-in="d.sleep.wake" value="${esc(d.sleep.wake)}">`)}
+    ${line(2,'Sleep time',`<input type="time" class="cell w-[100px] num" data-in="d.sleep.slept" value="${esc(d.sleep.slept)}">`)}
+    ${line(3,'How long I slept',`<span class="g text-[15px] font-bold num">${h.hrs!=null?h.hrs+' h':'—'}</span>`)}
+    ${line(4,'Steps walked',`<input class="cell w-[100px] num" inputmode="numeric" data-in="d.j.steps" value="${esc(d.j.steps)}" placeholder="0">`)}
+    <div class="py-2 space-y-1.5" style="border-bottom:1px solid rgba(255,255,255,.05)"><span class="sm"><span class="mut num mr-1.5">5</span>Rate the day</span><div class="flex gap-1.5">${rate}</div></div>
+    ${line(6,'Woke before '+t12(cfg.goals.wake),yesNo(h.wakeOk))}
+    ${line(7,'Workout done',`<span class="ui mut">${w.score!=null?w.score+'/5':''}</span>${yesNo(h.workout)}`)}
+    ${line(8,'Diet high-protein',toggleBtn('protein',d.protein,'Yes','No'))}
+    <div class="py-2 space-y-1.5" style="border-bottom:1px solid rgba(255,255,255,.05)">
+      <div class="flex items-center justify-between gap-2"><span class="sm"><span class="mut num mr-1.5">9</span>Wealth — did something to earn</span>${toggleBtn('jWealth',d.j.wealth,'Done','No')}</div>
+      <input class="bare ui sec" data-in="d.j.wn" value="${esc(d.j.wn)}" placeholder="What? (pitch, invoice, delivery…)">
+    </div>
+    ${line(10,'Slept before '+t12(cfg.goals.sleep),yesNo(h.sleepOk))}
+    ${line(11,'MOVERS done',`<span class="ui mut num">${mc}/5</span>${yesNo(mc===5)}`)}
+    <div class="pt-3 space-y-1.5">
+      <span class="lbl sec">Journal entry</span>
+      <textarea class="well p-3 sm" rows="5" data-in="d.j.text" placeholder="Couldn't write in your notebook today? Journal here.">${esc(d.j.text)}</textarea>
+    </div>
+  </section>
+
+  <section class="glass p-4 space-y-3">
+    <div class="flex items-center gap-2">${ic('cal','',`color:${J}`)}<h3 class="g text-[18px] font-semibold">Routine Check-ins</h3></div>
+    <div class="space-y-1.5">${per}</div>
+    <p class="ui mut">Change tasks, intervals and target weight in Profile → My Plan.</p>
+  </section>
+
+  ${weekInsights(date)}`;
+}
+function spark(vals){
+  if(vals.length<2) return '';
+  const mn = Math.min(...vals), mx = Math.max(...vals), r = mx-mn||1;
+  const pts = vals.map((v,i)=>`${(i/(vals.length-1)*80).toFixed(1)},${(22-(v-mn)/r*20).toFixed(1)}`).join(' ');
+  return `<svg viewBox="0 0 80 24" class="w-20 h-6 shrink-0" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="#38BDF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+function rangeStats(from, to){
+  const s = { n:0, wsum:0, wn:0, sets:0, reps:0, sh:0, shn:0, wakeOk:0, wakeN:0, sleepOk:0, sleepN:0, water:0, meals:0, ontime:0, protein:0, wealth:0, steps:0, stepsN:0, rate:0, rateN:0, late:{} };
+  for(let ds=from; ds<=to; ds=addDays(ds,1)){ if(!logged(ds)) continue; s.n++; const d = peek(ds), w = woStats(ds), h = habits(ds), dt = dietStats(ds);
+    if(w.score!=null){ s.wsum += w.score; s.wn++; } s.sets += w.setsD; s.reps += w.repsD;
+    if(h.hrs!=null){ s.sh += h.hrs; s.shn++; } if(h.wakeOk!=null){ s.wakeN++; s.wakeOk += h.wakeOk; } if(h.sleepOk!=null){ s.sleepN++; s.sleepOk += h.sleepOk; }
+    s.water += dt.water; s.meals += dt.done; s.ontime += dt.ontime; s.protein += d.protein?1:0; s.wealth += d.j.wealth?1:0;
+    if(num(d.j.steps)){ s.steps += num(d.j.steps); s.stepsN++; } if(d.j.rate){ s.rate += d.j.rate; s.rateN++; }
+    cfg.meals.forEach((m,i)=>{ const st = mealStat(ds,i); if(st.k==='late'){ s.late[m.n] = s.late[m.n]||{c:0,sum:0}; s.late[m.n].c++; s.late[m.n].sum += st.diff; } }); }
+  return { ...s, wavg: s.wn?s.wsum/s.wn:null, shAvg: s.shn?s.sh/s.shn:null, waterAvg: s.n?s.water/s.n:0,
+    stepsAvg: s.stepsN?Math.round(s.steps/s.stepsN):null, rateAvg: s.rateN?s.rate/s.rateN:null };
+}
+function weekInsights(date){
+  const from = addDays(date,-6), s = rangeStats(from, date);
+  const items = [
+    ['Workout', s.wavg!=null?s.wavg.toFixed(1)+'/5 avg':'—', `${s.sets} sets • ${s.reps} reps logged`, '#22C55E'],
+    ['Sleep', s.shAvg!=null?s.shAvg.toFixed(1)+' h avg':'—', `woke on time ${s.wakeOk}/${s.wakeN} • slept on time ${s.sleepOk}/${s.sleepN}`, '#818CF8'],
+    ['Diet', s.meals?Math.round(s.ontime/s.meals*100)+'% on time':'—', `${s.meals} meals • protein ${s.protein} days • water ${(s.waterAvg/1000).toFixed(1)}L avg`, '#38BDF8'],
+    ['Wealth', s.wealth+' / '+s.n+' days', 'days with a money-making activity', '#F59E0B'] ];
+  const lateTxt = Object.entries(s.late).sort((a,b)=>b[1].c-a[1].c).slice(0,2).map(([n,v])=>`${n} late ${v.c}× (avg +${hm2(v.sum/v.c)})`).join(' • ');
+  return `<section class="glass p-4 space-y-2.5">
+    <div class="flex items-center justify-between"><div class="flex items-center gap-2">${ic('chart','','color:#94A3B8')}<h3 class="g text-[18px] font-semibold">Last 7 days</h3></div><span class="ui mut">${fmtD(from,{day:'numeric',month:'short'})} – ${fmtD(date,{day:'numeric',month:'short'})}</span></div>
+    ${items.map(([l,v,s2,col])=>`<div class="sub p-3"><div class="flex items-center justify-between"><span class="lbl" style="color:${col}">${l}</span><span class="g text-[15px] font-bold num">${v}</span></div><p class="ui sec mt-0.5">${s2}</p></div>`).join('')}
+    ${lateTxt?`<p class="ui" style="color:#F97316">Improve: ${esc(lateTxt)}</p>`:''}
+  </section>`;
+}
+
+/* =====================================================================
+   PROFILE (opened from the avatar)
    ===================================================================== */
 function vProfile(){
-  const N = ZONE.profile, P = ZONE.happy;
+  const N = '#94A3B8', P = '#818CF8';
   const imps = [...state.improve].sort((a,b)=>b.ts-a.ts).map(m=>`
     <div class="sub p-3 flex items-start gap-2.5">
       ${ic('bulb','mt-0.5','width:16px;height:16px;color:#F59E0B')}
-      <div class="flex-1 min-w-0"><p class="sm">${esc(m.text)}</p><span class="ui mut">${esc(m.cat)} • ${new Date(m.ts).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span></div>
+      <div class="flex-1 min-w-0"><p class="sm whitespace-pre-wrap">${esc(m.text)}</p><span class="ui mut">${esc(m.cat)} • ${new Date(m.ts).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span></div>
       <button class="press" data-act="delImp:${m.ts}" aria-label="Delete">${ic('trash','','width:15px;height:15px;color:#64748B')}</button>
     </div>`).join('');
   const cats = IMP_CATS.map(c=>`<option ${ui.impCat===c?'selected':''}>${c}</option>`).join('');
-  const ranges = [['today','Today'],['week','Last Week'],['month','Last Month']].map(([k,l])=>{ const on = ui.range===k;
+  const ranges = [['today','Today'],['week','7 days'],['fortnight','15 days'],['month','30 days']].map(([k,l])=>{ const on = ui.range===k;
     return `<button class="flex-1 py-2 rounded-full lbl press" data-act="range:${k}" style="${on?'background:#1F1F25;color:#F8FAFC;box-shadow:0 1px 8px rgba(0,0,0,.3)':'color:#94A3B8'}">${l}</button>`; }).join('');
+  const g = cfg.goals;
+  const field = (label, bind, val, type='text') => `<label class="flex items-center justify-between gap-2 py-1.5"><span class="sm sec">${label}</span>
+      <input ${type==='time'?'type="time"':`inputmode="${type}"`} class="cell w-[110px] num" data-in="${bind}" value="${esc(val)}"></label>`;
+  const plan = `
+    <span class="lbl" style="color:#22C55E">Goals</span>
+    <div class="sub px-3 py-1">
+      ${field('Wake-up goal','cfg.goals.wake',g.wake,'time')}${field('Sleep goal','cfg.goals.sleep',g.sleep,'time')}
+      ${field('Water target (ml)','cfg.goals.water',g.water,'numeric')}${field('Meal late after (min)','cfg.goals.lateMin',g.lateMin,'numeric')}
+      ${field('Warm-up (min)','cfg.goals.warm',g.warm,'numeric')}${field('Stretch (min)','cfg.goals.stretch',g.stretch,'numeric')}
+      ${field('Target weight (kg)','cfg.goals.weight',g.weight,'decimal')}${field('Challenge length (days)','cfg.challenge.len',cfg.challenge.len,'numeric')}
+    </div>
+    <span class="lbl" style="color:#22C55E">Meals • ideal times</span>
+    <div class="sub p-2 space-y-1.5">${cfg.meals.map((m,i)=>`<div class="flex items-center gap-2">
+      <input class="cell flex-1 text-left" data-in="cfg.meals.${i}.n" value="${esc(m.n)}"><input type="time" class="cell w-[100px] num" data-in="cfg.meals.${i}.t" value="${esc(m.t)}"></div>`).join('')}</div>
+    <span class="lbl" style="color:#22C55E">Daily routine timeline</span>
+    <div class="sub p-2 space-y-1.5">${cfg.tl.map(([tm,l],i)=>`<div class="flex items-center gap-2">
+      <input type="time" class="cell w-[96px] num" data-in="cfg.tl.${i}.0" value="${esc(tm)}"><input class="cell flex-1 text-left" data-in="cfg.tl.${i}.1" value="${esc(l)}">
+      <button class="w-7 h-7 flex items-center justify-center press shrink-0" data-act="tlDel:${i}" aria-label="Remove step">${ic('x','','width:14px;height:14px;color:#64748B')}</button></div>`).join('')}
+      <button class="w-full py-2 rounded-lg lbl press" style="border:1px dashed #22C55E66;color:#22C55E" data-act="tlAdd">+ Add routine step</button></div>
+    <span class="lbl" style="color:#38BDF8">Routine check-ins</span>
+    <div class="sub p-2 space-y-1.5">${cfg.periodic.map((p,i)=>`<div class="flex items-center gap-2">
+      <input class="cell flex-1 text-left" data-in="cfg.periodic.${i}.n" value="${esc(p.n)}"><span class="ui sec">every</span>
+      <input class="cell w-[48px] num" inputmode="numeric" data-in="cfg.periodic.${i}.every" value="${esc(p.every)}"><span class="ui sec">d</span>
+      <button class="w-7 h-7 flex items-center justify-center press shrink-0" data-act="perDel:${i}" aria-label="Remove check-in">${ic('x','','width:14px;height:14px;color:#64748B')}</button></div>`).join('')}
+      <div class="flex gap-2"><button class="flex-1 py-2 rounded-lg lbl press" style="border:1px dashed #38BDF866;color:#38BDF8" data-act="perAdd:0">+ Tick task</button>
+      <button class="flex-1 py-2 rounded-lg lbl press" style="border:1px dashed #38BDF866;color:#38BDF8" data-act="perAdd:1">+ Measured task</button></div></div>
+    <p class="ui mut">Exercise names: tap a name on the Health tab and type. Kg/reps defaults: open an exercise → "Save as plan".</p>`;
 
   return `
   <section class="glass p-5 relative overflow-hidden">
@@ -782,9 +1225,8 @@ function vProfile(){
         <p class="ui sec mt-1 flex items-center gap-1">${ic('pin','','width:13px;height:13px')} Indore • Filmmaker &amp; travel creator</p>
       </div>
     </div>
-    <p class="sm sec mt-4 relative">Founder, Creative Bunai. Building health, wealth and happiness — one logged day at a time.</p>
     <div class="grid grid-cols-3 gap-2 mt-4 relative">
-      <div class="sub p-2.5 text-center"><p class="g text-[20px] font-bold num" id="p-days">0</p><p class="lbl sec" style="font-size:10px">Days logged</p></div>
+      <div class="sub p-2.5 text-center"><p class="g text-[20px] font-bold num">${Object.values(state.days).filter(x=>x.at>0).length}</p><p class="lbl sec" style="font-size:10px">Days logged</p></div>
       <div class="sub p-2.5 text-center"><p class="g text-[20px] font-bold num">${state.notes.length}</p><p class="lbl sec" style="font-size:10px">Notes</p></div>
       <div class="sub p-2.5 text-center"><p class="g text-[20px] font-bold num">${Math.max(0,dayDiff(CB_START,today())+1)}</p><p class="lbl sec" style="font-size:10px">CB day</p></div>
     </div>
@@ -805,28 +1247,32 @@ function vProfile(){
       </div>
       <button class="px-3.5 py-2 rounded-xl lbl flex items-center gap-1.5 press shrink-0" style="background:#22C55E;color:#0A0A0F" data-act="sync">${ic('sync','','width:15px;height:15px;stroke-width:2.4')} Sync now</button>
     </div>
-    <p class="ui mut">Auto-sync runs every 30 s while a URL is set. Saves land on this device first, then go to Sheets in the background.</p>`)}
+    <p class="ui mut">Auto-sync every 30 s. Saves land on this phone first, then go to Sheets.</p>`)}
+
+  ${acc('plan','sliders','#22C55E','My Plan',{text:'Goals, meals, routine, check-ins'},'b-plan',plan)}
 
   ${acc('improve','bulb','#F59E0B','System Improvements',{text:`${state.improve.length} ideas logged`},'b-imp',`
-    <textarea id="imp-text" class="well p-3 sm" rows="2" placeholder="What would make this system better?"></textarea>
+    <textarea id="imp-text" data-draft="imp" class="well p-3 sm" rows="3" placeholder="What would make this system better?"></textarea>
     <div class="flex gap-2">
       <select id="imp-cat" class="well px-3 py-2 sm flex-1">${cats}</select>
       <button class="px-4 rounded-xl lbl press" style="background:#F59E0B;color:#0A0A0F" data-act="addImp">Add idea</button>
     </div>
     <div class="space-y-1.5">${imps||'<p class="ui sec px-1">No ideas yet.</p>'}</div>`)}
 
-  ${acc('export','down',P,'Export Reports',{text:'CSV + TXT downloads'},'b-exp',`
+  ${acc('export','down',P,'Reports & Export',{text:'Insights, CSV, TXT'},'b-exp',`
     <div class="p-1 rounded-full flex" style="background:#0E0E13">${ranges}</div>
-    <pre class="deep p-3 text-[11px] leading-4 whitespace-pre-wrap max-h-[300px] overflow-y-auto num" style="font-family:ui-monospace,Menlo,monospace;color:#C6C5D5" id="report">Building report…</pre>
-    <div class="grid grid-cols-2 gap-2">
-      <button class="py-2.5 rounded-xl lbl flex items-center justify-center gap-1.5 press" style="background:${P};color:#0A0A0F" data-act="csv">${ic('down','','width:15px;height:15px;stroke-width:2.4')} Export CSV</button>
-      <button class="py-2.5 rounded-xl lbl flex items-center justify-center gap-1.5 press" style="background:#35343a" data-act="txt">${ic('note','','width:15px;height:15px')} Export TXT</button>
-    </div>`)}
+    <pre class="deep p-3 text-[11px] leading-4 whitespace-pre-wrap max-h-[340px] overflow-y-auto num" style="font-family:ui-monospace,Menlo,monospace;color:#C6C5D5" id="report">Building report…</pre>
+    <div class="grid grid-cols-3 gap-2">
+      <button class="py-2.5 rounded-xl lbl flex items-center justify-center gap-1 press" style="background:${P};color:#0A0A0F" data-act="csv">${ic('down','','width:14px;height:14px;stroke-width:2.4')} Daily</button>
+      <button class="py-2.5 rounded-xl lbl flex items-center justify-center gap-1 press" style="background:#22C55E;color:#0A0A0F" data-act="excsv">${ic('dumbbell','','width:14px;height:14px;stroke-width:2.4')} Gym</button>
+      <button class="py-2.5 rounded-xl lbl flex items-center justify-center gap-1 press" style="background:#35343a" data-act="txt">${ic('note','','width:14px;height:14px')} TXT</button>
+    </div>
+    <p class="ui mut">Daily + Gym download as CSV (open in Sheets/Excel). Gym CSV has every set: exercise, kg, reps — best for long-run analysis.</p>`)}
 
   <section class="glass p-4 space-y-3">
     <div class="flex items-center gap-2">${ic('db','',`color:${N}`)}<h3 class="g text-[17px] font-semibold">Storage</h3></div>
     <div class="grid grid-cols-2 gap-2 sm" id="storage"></div>
-    <button class="w-full py-3 rounded-xl lbl flex items-center justify-center gap-1.5 press" style="background:#EF44441A;color:#EF4444;border:1px solid #EF444440" data-act="resetToday">${ic('reset','','width:15px;height:15px')} Reset today's data</button>
+    <button class="w-full py-3 rounded-xl lbl flex items-center justify-center gap-1.5 press" style="background:#EF44441A;color:#EF4444;border:1px solid #EF444440" data-act="resetDay">${ic('reset','','width:15px;height:15px')} Clear today's data</button>
   </section>`;
 }
 
@@ -834,44 +1280,50 @@ function vProfile(){
    DERIVED VALUES (update without rebuilding inputs)
    ===================================================================== */
 function derive(){
-  const G = ZONE.health, A = ZONE.wealth;
+  const date = ui.date;
   if(ui.tab==='health'){
-    const c = calc();
-    setRing('r-w', c.w/100, c.w+'%', `${c.done}/${c.total} sets`);
-    setRing('r-d', c.d/100, c.d+'%', `${c.meals}/6 meals`);
-    setRing('r-m', c.m/100, c.m+'%', `${c.movers}/5 done`);
-    setRing('r-s', c.sh/8, c.sh+'h', c.sh>=7?'Recovered':'Short');
-    setTxt('live-pct', 'Live '+c.live+'%');
-    setTxt('wo-pct', c.w+'% Done'); setW('wo-bar', c.w);
-    setTxt('b-wo', `${c.done}/${c.total}`);
-    setTxt('water-stat', `${(c.waterMl/1000).toFixed(2).replace(/0$/,'')}L / ${WATER_TOTAL/1000}L`);
-    setTxt('b-diet', `${(c.waterMl/1000).toFixed(1)}L`);
-    setTxt('diet-sub', `${c.meals}/6 meals • creatine ${state.creatine?'taken':'pending'}`);
-    setTxt('b-mov', `${c.m}%`); setTxt('mov-sub', `${c.movers}/5 completed • Mind mastery`);
-    const hh = Math.floor(c.sh), mm = Math.round((c.sh-hh)*60);
-    setTxt('b-sleep', `${c.sh} H`); setTxt('sleep-sub', `Slept ${hh}h ${pad(mm)}m • target 7h 30m`);
-    setTxt('sleep-win', `${hh}h ${pad(mm)}m window`);
-    setTxt('tl-count', `${Object.values(state.tl).filter(Boolean).length} / ${TL.length}`);
+    const w = woStats(date), dt = dietStats(date), mv = moverCount(date), hrs = sleepHrs(date), d = peek(date), h = habits(date);
+    const scCol = w.score==null ? '#94A3B8' : SCORE[w.score];
+    setRing('r-w', (w.score||0)/5, w.score==null?'Rest':w.score+'/5', `${w.setsD}/${w.setsT} sets`, scCol==='#27272A'?'#3F3F46':scCol);
+    setRing('r-d', dt.pct/100, dt.pct+'%', `${dt.done}/${dt.n} meals`);
+    setRing('r-m', mv/5, mv*20+'%', `${mv}/5 done`);
+    setRing('r-s', (hrs||0)/8, hrs!=null?hrs+'h':'—', hrs==null?'add times':hrs>=7?'Recovered':'Short', '#818CF8');
+    const live = Math.round(((w.score||0)/5*100 + dt.pct + mv*20 + Math.min((hrs||0)/8,1)*100)/4);
+    setTxt('live-pct', 'Live '+live+'%');
+    setTxt('wo-score', w.score==null?'R':w.score); setTxt('wo-why', w.why);
+    const sb = document.getElementById('wo-scorebox'); if(sb){ sb.style.background = scCol+'1F'; sb.style.border = '1px solid '+scCol+'55'; document.getElementById('wo-score').style.color = scCol==='#27272A'?'#94A3B8':scCol; }
+    setTxt('wo-ex', `${w.full}/${w.n}`); setTxt('wo-sets', `${w.setsD}/${w.setsT}`); setTxt('wo-reps', `${w.repsD}/${w.target}`);
+    setW('wo-bar', w.pct); setTxt('b-wo', w.score==null?'Rest':w.score+'/5');
+    setTxt('wo-sub', `${w.n?w.n+' exercises • ':''}${w.pct}% reps`);
+    setTxt('water-l', +(dt.water/1000).toFixed(2)+' L');
+    setTxt('water-pct', Math.round(dt.water/dt.target*100)+'%'); setW('water-bar', dt.water/dt.target*100);
+    setTxt('b-diet', `${+(dt.water/1000).toFixed(1)}L`);
+    setTxt('diet-sub', `${dt.done}/${dt.n} meals • ${dt.ontime} on time • creatine ${d.cre?'taken':'pending'}`);
+    setTxt('b-mov', `${mv*20}%`); setTxt('mov-sub', `${mv}/5 completed • Mind mastery`);
+    setTxt('b-sleep', hrs!=null?hrs+' H':'—');
+    setTxt('sleep-sub', `Woke ${d.sleep.wake?t12(d.sleep.wake):'—'} • sleep ${d.sleep.slept?t12(d.sleep.slept):'—'}`);
+    setTxt('sleep-hrs', hrs!=null?hrs+' h':'—');
+    const wo = document.getElementById('wake-ok'); if(wo){ wo.textContent = h.wakeOk==null?'Goal '+t12(cfg.goals.wake):h.wakeOk?'Before goal':'After goal'; wo.style.color = h.wakeOk==null?'#64748B':h.wakeOk?'#22C55E':'#EF4444'; }
+    const so = document.getElementById('sleep-ok'); if(so){ so.textContent = h.sleepOk==null?'Goal '+t12(cfg.goals.sleep):h.sleepOk?'Before goal':'After goal'; so.style.color = h.sleepOk==null?'#64748B':h.sleepOk?'#22C55E':'#EF4444'; }
+    setTxt('tl-count', `${Object.values(d.tl).filter(Boolean).length} / ${cfg.tl.length}`);
   }
   if(ui.tab==='wealth'){
-    const k = state.kpi;
-    [['earning',v=>`${inr(v)} of ${inr(TARGETS.earning)}`],['bank',v=>`${inr(v)} of ${inr(TARGETS.bank)}`],
-     ['clients',()=> 'Direct mandates'],['dw',()=> 'Today’s focused hours']].forEach(([key,sub])=>{
-      const v = num(k[key]), p = Math.round(v/TARGETS[key]*100);
+    const k = cfg.kpi, T = { earning:100000, bank:150000, clients:35, dw:5 };
+    [['earning',v=>`${inr(v)} of ${inr(T.earning)}`],['bank',v=>`${inr(v)} of ${inr(T.bank)}`],['clients',()=>'Direct mandates'],['dw',()=>'Focused hours this day']].forEach(([key,sub])=>{
+      const v = num(key==='dw'?peek(date).dw:k[key]), p = Math.round(v/T[key]*100);
       setTxt(`k-${key}-pct`, p+'%'); setW(`k-${key}-bar`, p);
-      setTxt(`k-${key}-chip`, key==='earning'||key==='bank' ? inrShort(v) : p>=100?'Hit':(+(TARGETS[key]-v).toFixed(1))+(key==='dw'?'h':'')+' left');
+      setTxt(`k-${key}-chip`, key==='earning'||key==='bank' ? inrShort(v) : p>=100?'Hit':(+(T[key]-v).toFixed(1))+(key==='dw'?'h':'')+' left');
       setTxt(`k-${key}-sub`, sub(v));
     });
     const tot = state.clients.reduce((a,c)=>a+num(c.a),0);
     setTxt('pipe-total', `${state.clients.length} • ${inrShort(tot)}/mo`);
   }
   if(ui.tab==='profile'){
-    setTxt('p-days', Object.keys(state.history).length+1);
     setTxt('b-imp', state.improve.length);
-    setTxt('b-exp', ({today:'Today',week:'7D',month:'30D'})[ui.range]);
+    setTxt('b-exp', ({today:'Today',week:'7D',fortnight:'15D',month:'30D'})[ui.range]);
     const bytes = new Blob([localStorage.getItem(KEY)||'']).size;
     const st = document.getElementById('storage');
-    if(st) st.innerHTML = [['Local cache',(bytes/1024).toFixed(1)+' KB'],['History days',Object.keys(state.history).length],
+    if(st) st.innerHTML = [['Phone cache',(bytes/1024).toFixed(1)+' KB'],['Days on phone',Object.keys(state.days).length],
       ['Notes / ideas',state.notes.length+' / '+state.improve.length],['Last sync',state.lastSync?ago(state.lastSync):'never']]
       .map(([l,v])=>`<div class="sub p-3"><p class="ui sec">${l}</p><p class="g text-[17px] font-semibold num">${v}</p></div>`).join('');
     buildReport(false);
@@ -881,98 +1333,150 @@ function derive(){
 /* =====================================================================
    ACTIONS
    ===================================================================== */
+function setDate(ds){ if(!ds) return; if(ds>today()) ds = today(); ui.date = ds; ui.openEx = {}; ui.custom = false; render(true); }
 document.addEventListener('click', e=>{
+  if(e.target.id==='sheet'){ closeSheet(); return; }          // tap on the dimmed background
   const el = e.target.closest('[data-act]'); if(!el) return;
   if(el.tagName==='A') e.preventDefault();
   const [act, a, b] = el.dataset.act.split(':');
-  const t = today();
+  const date = ui.date, isToday = date===today();
   switch(act){
     case 'tab': ui.tab = a; saveUI(); render(true); window.scrollTo({top:0,behavior:'smooth'}); return;
     case 'acc': ui.closed[a] = !ui.closed[a]; saveUI(); document.getElementById('acc-'+a).classList.toggle('closed', ui.closed[a]); return;
-    case 'set': { const k = `${t}-e${a}-s${b}`; if(state.sets[k]) delete state.sets[k]; else state.sets[k] = true; break; }
-    case 'wd': state.wdScores[a] = ((state.wdScores[a]||0)+1)%6; break;
-    case 'rate': state.rating = state.rating===+a ? 0 : +a; break;
-    case 'water': { const i = +a, at = state.water.indexOf(i); if(at>-1) state.water.splice(at,1); else state.water.push(i); break; }
-    case 'meal': state.meals[a] = !state.meals[a]; break;
-    case 'creatine': state.creatine = !state.creatine; break;
-    case 'mover': state.movers[a] = !state.movers[a]; linkMover(a); break;
-    case 'tl': state.tl[a] = !state.tl[a]; break;
-    case 'chk': state.checks[a] = !state.checks[a]; break;
-    case 'ps': state.checks['ps'+a] = !state.checks['ps'+a]; if(a==='0') state.movers.R = state.checks.ps0; if(a==='1') state.movers.S = state.checks.ps1; break;
-    case 'addClient': state.clients.push({n:'',a:''}); state.clientsAt = Date.now(); touch(); render();
+    case 'dateShift': setDate(addDays(date, +a)); return;
+    case 'dateToday': setDate(today()); return;
+    case 'goDate': setDate(a); return;
+    case 'cyc': { const e = ensureWo(date).ex[+a], dn = e.s.filter(s=>s.d).length, nx = (dn+1)%(e.s.length+1);
+      e.s.forEach((s,j)=>s.d = j<nx); markDay(); render(); return; }
+    case 'setDone': { const s = ensureWo(date).ex[+a].s[+b]; s.d = !s.d; markDay(); render(); return; }
+    case 'openEx': ui.openEx[a] = !ui.openEx[a]; render(); return;
+    case 'saveDefault': { const wo = ensureWo(date), e = wo.ex[+a], sp = cfg.splits[wo.split];
+      if(sp?.ex[+a]){ sp.ex[+a].n = e.n; sp.ex[+a].sets = e.s.map(s=>({ kg:num(s.kg), reps:num(s.reps) })); markCfg(); toast(e.n+' saved as plan default'); } return; }
+    case 'woFlag': { const wo = ensureWo(date); wo[a] = !wo[a]; markDay(); render(); return; }
+    case 'water': { day(date).water.push({ ml:+a, t:isToday?nowHM():'' }); markDay(); render(); toast(`+${a} ml`); return; }
+    case 'unwater': day(date).water.splice(+a,1); markDay(); render(); return;
+    case 'customToggle': ui.custom = !ui.custom; render(); setTimeout(()=>$('#custom-ml')?.focus(),50); return;
+    case 'customAdd': { const v = Math.round(num($('#custom-ml')?.value)); if(!v||v>3000) return toast('Enter ml between 1 and 3000');
+      day(date).water.push({ ml:v, t:isToday?nowHM():'' }); ui.custom = false; markDay(); render(); toast(`+${v} ml`); return; }
+    case 'creatine': { const d = day(date); d.cre = !d.cre; d.creT = d.cre && isToday ? nowHM() : ''; markDay(); render(); return; }
+    case 'meal': { const d = day(date), m = d.meals[a] = d.meals[a]||{ d:false, at:'', q:'', f:'' }; m.d = !m.d;
+      if(m.d && !m.at) m.at = isToday ? nowHM() : cfg.meals[+a].t; markDay(); render(); return; }
+    case 'protein': day(date).protein = !day(date).protein; markDay(); render(); return;
+    case 'mover': { const d = day(date); d.mv[a] = !d.mv[a]; linkMover(d,a); markDay(); render(); return; }
+    case 'tl': day(date).tl[a] = !day(date).tl[a]; markDay(); render(); return;
+    case 'ct': day(date).ct[a] = !day(date).ct[a]; markDay(); render(); return;
+    case 'ps': { const d = day(date); d.ps[a] = !d.ps[a]; if(a==='0') d.mv.R = d.ps[0]; if(a==='1') d.mv.S = d.ps[1]; markDay(); render(); return; }
+    case 'rate': { const d = day(date); d.j.rate = d.j.rate===+a ? 0 : +a; markDay(); render(); return; }
+    case 'jWealth': day(date).j.wealth = !day(date).j.wealth; markDay(); render(); return;
+    case 'perToggle': { const d = day(date); if(d.per[a]) delete d.per[a]; else d.per[a] = true; markDay(); render(); return; }
+    case 'perSave': { const v = num($('#per-'+a)?.value); if(!v) return toast('Enter a value first'); day(date).per[a] = v; markDay(); render(); toast('Saved'); return; }
+    case 'wk': cfg.wk[a] = !cfg.wk[a]; markCfg(); render(); return;
+    case 'taskAdd': { const t = $('#tf-t').value.trim(); if(!t) return toast('Write the task first');
+      const task = { id:uid(), t, c:$('#tf-c').value.trim(), type:$('#tf-type').value, m:$('#tf-m').value, qty:Math.max(1,Math.round(num($('#tf-q').value))||1), done:0, ts:Date.now() };
+      cfg.tasks.push(task); ui.taskForm = { m:task.m, type:task.type, qty:1 }; ui.drafts.taskT = ''; ui.drafts.taskC = ''; saveUI(); markCfg(); render(); toast('Task added'); return; }
+    case 'taskInc': case 'taskDec': { const t = cfg.tasks.find(x=>x.id===a); if(!t) return; const q = Math.max(1,num(t.qty));
+      t.done = Math.max(0, Math.min(q, num(t.done)+(act==='taskInc'?1:-1))); if(t.done>=q) t.doneAt = Date.now(); markCfg(); render(); return; }
+    case 'taskDel': { const t = cfg.tasks.find(x=>x.id===a); if(!t || !confirm('Delete "'+t.t+'"?')) return; cfg.tasks = cfg.tasks.filter(x=>x.id!==a); markCfg(); render(); return; }
+    case 'addClient': state.clients.push({n:'',a:''}); state.clientsAt = Date.now(); markMisc(); render();
       setTimeout(()=>{ const ins = document.querySelectorAll('#pipe-list input[data-in$=".n"]'); ins[ins.length-1]?.focus(); }, 50); return;
     case 'delClient': if(state.clients[a] && (state.clients[a].n||state.clients[a].a) && !confirm('Remove '+(state.clients[a].n||'this client')+'?')) return;
-      state.clients.splice(+a,1); state.clientsAt = Date.now(); break;
+      state.clients.splice(+a,1); state.clientsAt = Date.now(); markMisc(); render(); return;
     case 'nf': ui.noteFilter = a; saveUI(); render(); return;
     case 'nt': ui.noteTag = a; saveUI(); render(); return;
     case 'addNote': { const ta = $('#note-text'); if(!ta.value.trim()) return toast('Write something first');
-      addNote(ta.value.trim(), ui.noteTag); return; }
-    case 'delNote': if(!confirm('Delete this note?')) return; state.notes = state.notes.filter(n=>n.ts!==+a); state.delNotes.push(+a); break;
+      addNote(ta.value.trim(), ui.noteTag); ui.drafts.note = ''; saveUI(); render(); return; }
+    case 'delNote': if(!confirm('Delete this note?')) return; state.notes = state.notes.filter(n=>n.ts!==+a); state.delNotes.push(+a); markMisc(); render(); return;
     case 'fab': openSheet(); return;
-    case 'closeSheet': case 'closeSheetBg': closeSheet(); return;
+    case 'closeSheet': closeSheet(); return;
     case 'st': ui.sheetTag = a; saveUI(); paintSheetTags(); return;
-    case 'sheetSave': { const ta = $('#sheet-text'); if(!ta.value.trim()) return toast('Write something first');
-      addNote(ta.value.trim(), ui.sheetTag); ta.value=''; closeSheet(); return; }
-    case 'qWater': { const nx = WATER.findIndex((_,i)=>!state.water.includes(i)); if(nx<0) { toast('Hydration maxed — 4L done'); return; }
-      state.water.push(nx); touch(); render(); toast(`+${WATER[nx]} ml logged`); return; }
-    case 'qMeal': { const nx = MEALS.findIndex((_,i)=>!state.meals[i]); if(nx<0){ toast('All 6 meals logged'); return; }
-      state.meals[nx] = true; touch(); render(); toast(MEALS[nx][1]+' logged'); return; }
-    case 'qMover': { const nx = MOVERS.find(m=>!state.movers[m[0]]); if(!nx){ toast('MOVERS already complete'); return; }
-      state.movers[nx[0]] = true; linkMover(nx[0]); touch(); render(); toast(nx[2]+' complete'); return; }
+    case 'sheetSave': { const ta = $('#sheet-text'), v = ta.value.trim(); if(!v) return toast('Write something first');
+      if(ui.sheetTag==='Journal'){ const d = day(date); d.j.text = (d.j.text?d.j.text+'\n\n':'') + `[${t12(nowHM())}] ` + v; markDay(); toast('Added to '+fmtD(date,{day:'numeric',month:'short'})+' journal'); }
+      else addNote(v, ui.sheetTag);
+      ta.value = ''; ui.drafts.sheet = ''; saveUI(); closeSheet(); render(); return; }
+    case 'qMeal': { const d = day(date), nx = cfg.meals.findIndex((_,i)=>!d.meals[i]?.d); if(nx<0){ toast('All meals logged'); return; }
+      d.meals[nx] = { q:'', f:'', ...(d.meals[nx]||{}), d:true, at: isToday?nowHM():cfg.meals[nx].t }; markDay(); render(); toast(cfg.meals[nx].n+' logged at '+t12(d.meals[nx].at)); return; }
+    case 'qMover': { const d = day(date), nx = MOVERS.find(m=>!d.mv[m[0]]); if(!nx){ toast('MOVERS already complete'); return; }
+      d.mv[nx[0]] = true; linkMover(d,nx[0]); markDay(); render(); toast(nx[2]+' complete'); return; }
     case 'sync': syncNow(true); return;
     case 'saveUrl': { const u = $('#sheets-url').value.trim();
       if(u && !/^https:\/\/script\.google(usercontent)?\.com\//.test(u)) return toast('That doesn’t look like an Apps Script URL');
       state.sheetsUrl = u; saveLocal(); toast(u?'URL saved — syncing…':'Sync disconnected'); paintSync(); if(u) syncNow(true); return; }
     case 'addImp': { const ta = $('#imp-text'); if(!ta.value.trim()) return toast('Describe the idea first');
-      ui.impCat = $('#imp-cat').value; saveUI(); state.improve.push({ text:ta.value.trim(), cat:ui.impCat, ts:Date.now() }); break; }
-    case 'delImp': if(!confirm('Delete this idea?')) return; state.improve = state.improve.filter(m=>m.ts!==+a); state.delImprove.push(+a); break;
+      ui.impCat = $('#imp-cat').value; state.improve.push({ text:ta.value.trim(), cat:ui.impCat, ts:Date.now() }); ui.drafts.imp = ''; saveUI(); markMisc(); render(); toast('Idea saved'); return; }
+    case 'delImp': if(!confirm('Delete this idea?')) return; state.improve = state.improve.filter(m=>m.ts!==+a); state.delImprove.push(+a); markMisc(); render(); return;
+    case 'tlAdd': cfg.tl.push(['21:00','New step']); markCfg(); render(); return;
+    case 'tlDel': if(!confirm('Remove "'+cfg.tl[+a][1]+'"?')) return; cfg.tl.splice(+a,1); markCfg(); render(); return;
+    case 'perAdd': cfg.periodic.push({ id:uid(), n:a==='1'?'New measurement':'New check-in', every:14, val:a==='1', unit:'' }); markCfg(); render(); return;
+    case 'perDel': if(!confirm('Remove "'+cfg.periodic[+a].n+'"?')) return; cfg.periodic.splice(+a,1); markCfg(); render(); return;
     case 'range': ui.range = a; saveUI(); render(); return;
-    case 'csv': exportFile('csv'); return;
-    case 'txt': exportFile('txt'); return;
-    case 'resetToday': if(!confirm('Reset all of today’s workout, diet, movers, sleep and daily checklists?')) return;
-      state.lastDay = ''; const keepQ = state.queue.length; rollover(); state.queue.length = keepQ; state.lastDay = today(); touch(); render(); toast('Today reset'); return;
+    case 'csv': case 'excsv': case 'txt': exportFile(act); return;
+    case 'resetDay': if(!confirm('Clear everything logged today (workout, diet, water, sleep, journal…)?')) return;
+      state.days[today()] = blankDay(); markDay(today()); render(); toast('Today cleared'); return;
     default: return;
   }
-  touch(); render();
 });
-function linkMover(k){ if(k==='R') state.checks.ps0 = state.movers.R; if(k==='S') state.checks.ps1 = state.movers.S; }
-function addNote(text, tag){ state.notes.push({ text, tag, ts:Date.now() }); touch(); render(); toast('Note saved'); }
+function linkMover(d,k){ if(k==='R') d.ps[0] = !!d.mv.R; if(k==='S') d.ps[1] = !!d.mv.S; }
+function addNote(text, tag){ state.notes.push({ text, tag, ts:Date.now() }); markMisc(); toast(tag+' saved'); }
 
+document.addEventListener('change', e=>{ if(e.target.dataset?.actInput==='datePick' && e.target.value) setDate(e.target.value); });
 document.addEventListener('input', e=>{
-  const el = e.target; if(!el.dataset || !el.dataset.in) return;
-  const path = el.dataset.in.split('.');
-  let o = state; for(let i=0;i<path.length-1;i++) o = o[path[i]];
+  const el = e.target;
+  if(el.dataset?.draft){ ui.drafts[el.dataset.draft] = el.value; saveUI(); return; }
+  if(!el.dataset || !el.dataset.in) return;
+  const path = el.dataset.in.split('.'), head = path.shift();
+  let root, kind;
+  if(head==='d'){ root = day(ui.date); kind = 'd'; if(path[0]==='wo') ensureWo(ui.date); }
+  else if(head==='prev'){ root = day(addDays(ui.date,-1)); kind = 'prev'; }
+  else if(head==='cfg'){ root = cfg; kind = 'cfg'; }
+  else { root = state; kind = 'misc'; path.unshift(head); }
+  let o = root; for(let i=0;i<path.length-1;i++){ if(o[path[i]]==null) o[path[i]] = {}; o = o[path[i]]; }
   o[path[path.length-1]] = el.value;
+  if(kind==='d' && path[0]==='meals'){ const m = root.meals[path[1]]; if(m.d===undefined) m.d = false; if(path[2]==='at' && el.value) m.d = true; }
+  if(kind==='d' && path[0]==='wo' && path[2]==='n'){ const sp = cfg.splits[root.wo.split]; if(sp?.ex[+path[1]]){ sp.ex[+path[1]].n = el.value; markCfg(); } }
   if(path[0]==='clients') state.clientsAt = Date.now();
-  if(path[0]==='sleep' && !el.value) return;
-  touch(); derive();
+  if(kind==='d') markDay(); else if(kind==='prev') markDay(addDays(ui.date,-1)); else if(kind==='cfg') markCfg(); else markMisc();
+  derive();
 });
+document.addEventListener('focusout', ()=>{ setTimeout(()=>{ if(pendingRender && !typing() && !$('#sheet').classList.contains('open')) render(); }, 80); });
+function restoreDrafts(){ document.querySelectorAll('[data-draft]').forEach(el=>{ const v = ui.drafts[el.dataset.draft]; if(v && !el.value) el.value = v; }); }
 
-/* ---------- sheet ---------- */
+/* ---------- quick capture sheet ---------- */
 function paintSheetTags(){
   $('#sheet-tags').innerHTML = TAGS.map(([tg,col])=>{ const on = ui.sheetTag===tg;
     return `<button class="px-3 py-1.5 rounded-full ui press" data-act="st:${tg}" style="background:${on?col:'#1B1B20'};color:${on?'#0A0A0F':col}">${tg}</button>`; }).join('');
+  $('#sheet-save').textContent = ui.sheetTag==='Journal' ? 'Add to journal ('+fmtD(ui.date,{day:'numeric',month:'short'})+')' : 'Save '+ui.sheetTag.toLowerCase();
+  $('#sheet-text').placeholder = ui.sheetTag==='Journal' ? 'Write today\'s journal…' : ui.sheetTag==='Idea' ? 'Capture the idea…' : 'What\'s on your mind?';
 }
-function openSheet(){ if(ui.tab!=='profile') ui.sheetTag = ({health:'Health',wealth:'Wealth',happy:'Happy'})[ui.tab]; paintSheetTags();
-  $('#sheet').classList.add('open'); $('#fab').classList.add('on'); setTimeout(()=>$('#sheet-text').focus(), 280); }
-function closeSheet(){ $('#sheet').classList.remove('open'); $('#fab').classList.remove('on'); }
+function openSheet(){ paintSheetTags(); restoreDrafts(); $('#sheet').classList.add('open'); $('#fab').classList.add('on'); setTimeout(()=>$('#sheet-text').focus(), 280); }
+function closeSheet(){ $('#sheet').classList.remove('open'); $('#fab').classList.remove('on'); if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); }
 
 let toastT;
 function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 2200); }
 
 /* =====================================================================
-   GOOGLE SHEETS SYNC
+   GOOGLE SHEETS SYNC (same code.gs API as v3)
    ===================================================================== */
+function snap(date){
+  const d = peek(date), w = woStats(date), dt = dietStats(date), h = habits(date);
+  const dayNotes = state.notes.filter(n=>ymd(new Date(n.ts))===date).map(n=>`[${n.tag}] ${n.text}`);
+  if(d.j.text) dayNotes.unshift('[Journal] '+d.j.text);
+  const payload = { v:4, day:d };
+  if(date===today()){ payload.cfg = cfg; payload.cfgAt = state.cfgAt; }
+  return { date, workoutPct:w.pct, dietPct:dt.pct, moversPct:moverCount(date)*20, sleepHrs:h.hrs??'', waterMl:dt.water,
+    earning:num(cfg.kpi.earning), bank:num(cfg.kpi.bank), clients:num(cfg.kpi.clients), deepWork:num(d.dw),
+    rating:w.score??'', notes:dayNotes.join(' | '), wdScores:JSON.stringify(state.wdScores), updatedAt:d.at||Date.now(),
+    stateJson:JSON.stringify(payload) };
+}
 function setSync(s, msg=''){ syncState = { s, msg }; paintSync(); }
 function paintSync(){
   const s = state.sheetsUrl ? syncState.s : 'off';
-  const col = { off:'#27272A', busy:'#F59E0B', ok:'#22C55E', err:'#EF4444', idle:'#94A3B8' }[s] || '#94A3B8';
+  const col = { off:'#27272A', busy:'#F59E0B', ok:'#22C55E', err:'#EF4444' }[s] || '#94A3B8';
   const hd = $('#hdr-sync'); if(hd) hd.style.background = col;
   const dot = document.getElementById('sync-dot'); if(!dot) return;
   dot.style.background = col; dot.style.boxShadow = s==='ok'||s==='busy' ? `0 0 8px ${col}` : 'none';
-  setTxt('sync-title', { off:'Not connected', busy:'Syncing…', ok:'Synced', err:'Sync error', idle:'Connected' }[s]);
-  setTxt('sync-msg', s==='err' ? syncState.msg : state.lastSync ? 'Last sync '+ago(state.lastSync)+(state.dirty?' • changes pending':'') : state.sheetsUrl ? 'Waiting for first sync' : 'Paste your Apps Script URL above');
-  setTxt('b-sync', { off:'Offline', busy:'…', ok:'Live', err:'Error', idle:'Ready' }[s]);
+  setTxt('sync-title', { off:'Not connected', busy:'Syncing…', ok:'Synced', err:'Sync error' }[s]);
+  setTxt('sync-msg', s==='err' ? syncState.msg : state.lastSync ? 'Last sync '+ago(state.lastSync)+(isDirty()?' • changes pending':'') : state.sheetsUrl ? 'Waiting for first sync' : 'Paste your Apps Script URL above');
+  setTxt('b-sync', { off:'Offline', busy:'…', ok:'Live', err:'Error' }[s]);
 }
 async function api(method, params, body){
   const url = state.sheetsUrl.trim();
@@ -984,45 +1488,52 @@ async function api(method, params, body){
   const j = await r.json(); if(!j.ok) throw new Error(j.error||'Server error'); return j;
 }
 async function push(){
-  const seq = editSeq;
+  const seq = editSeq, dates = [...new Set([...state.dirty, today()])];
   await api('POST', null, {
-    action:'save', days:[...state.queue, snap(today())],
+    action:'save', days:dates.map(snap),
     notes:state.notes, improvements:state.improve, delNotes:state.delNotes, delImprove:state.delImprove,
     clients:state.clients.map((c,i)=>({ idx:i+1, name:c.n, amount:num(c.a) })), clientsAt:state.clientsAt,
     wdScores:state.wdScores
   });
-  state.queue = []; state.delNotes = []; state.delImprove = [];
-  if(seq===editSeq) state.dirty = false;
+  state.delNotes = []; state.delImprove = [];
+  if(seq===editSeq){ state.dirty = []; state.cfgDirty = false; }
 }
 async function pull(from, to){
-  const j = await api('GET', { action:'get', from: from||addDays(today(),-40), to: to||today() });
-  const t = today();
+  const j = await api('GET', { action:'get', from: from||addDays(today(),-100), to: to||today() });
+  let best = null;
   (j.daily||[]).forEach(r=>{
-    if(r.date===t){
-      if(Number(r.updatedAt) > (state.updatedAt||0) && !state.dirty){
-        try{ applyDayState(JSON.parse(r.stateJson||'null')); }catch(e){}
-        state.updatedAt = Number(r.updatedAt);
-      }
-    } else { const { stateJson, ...lite } = r; state.history[r.date] = lite; }
+    let ds = null; try{ ds = JSON.parse(r.stateJson||'null'); }catch(e){}
+    const { stateJson, ...lite } = r; state.history[r.date] = lite;
+    if(ds && ds.v===4){
+      const loc = state.days[r.date];
+      if(!state.dirty.includes(r.date) && (!loc || (ds.day?.at||0) > (loc.at||0))) state.days[r.date] = normDay(ds.day);
+      if(ds.cfg && (ds.cfgAt||0) > (state.cfgAt||0) && (!best || ds.cfgAt > best.cfgAt)) best = ds;
+    } else if(ds && !state.days[r.date]) state.days[r.date] = fromV3Day(ds);
   });
+  if(best && !state.cfgDirty){ cfg = state.cfg = normCfg(best.cfg); state.cfgAt = best.cfgAt; }
   const merge = (local, remote, dels) => { const m = new Map(local.map(x=>[x.ts,x])); (remote||[]).forEach(x=>{ if(!dels.includes(x.ts)) m.set(x.ts,x); }); return [...m.values()]; };
-  state.notes = merge(state.notes, (j.notes||[]).map(n=>({ text:n.text, tag:n.tag, ts:Number(n.ts) })), state.delNotes);
-  state.improve = merge(state.improve, (j.improvements||[]).map(n=>({ text:n.text, cat:n.cat, ts:Number(n.ts) })), state.delImprove);
+  state.notes = merge(state.notes, (j.notes||[]).map(n=>({ text:String(n.text), tag:n.tag, ts:Number(n.ts) })), state.delNotes);
+  state.improve = merge(state.improve, (j.improvements||[]).map(n=>({ text:String(n.text), cat:n.cat, ts:Number(n.ts) })), state.delImprove);
   if(j.clients && Number(j.clientsAt||0) > (state.clientsAt||0)){
     state.clients = j.clients.map(c=>({ n:String(c.name??''), a:c.amount===''||c.amount==null?'':String(c.amount) }));
     state.clientsAt = Number(j.clientsAt);
   }
-  if(j.wdScores) Object.entries(j.wdScores).forEach(([d,s])=>{ s = Number(s)||0; if(s) state.wdScores[d] = s; else delete state.wdScores[d]; });
+  if(j.wdScores) Object.entries(j.wdScores).forEach(([d,s])=>{ if(!state.days[d]?.wo && !state.dirty.includes(d)) state.wdScores[d] = Number(s)||0; });
+  if(!num(cfg.kpi.earning) && !num(cfg.kpi.bank)){       // after migration: seed KPIs from the latest synced day
+    const lastRow = (j.daily||[]).filter(r=>num(r.earning)||num(r.bank)).pop();
+    if(lastRow){ cfg.kpi.earning = String(lastRow.earning||''); cfg.kpi.bank = String(lastRow.bank||''); cfg.kpi.clients = String(lastRow.clients||''); }
+  }
   return j;
 }
 async function syncNow(manual, onLoad){
   if(!state.sheetsUrl.trim()){ if(manual) toast('Add your Sheets URL in Profile → Settings'); setSync('off'); return; }
   if(syncing) return; syncing = true; setSync('busy');
   try{
-    if(onLoad){ await pull(); if(state.dirty || state.queue.length) await push(); }
-    else { if(state.dirty || state.queue.length || manual) await push(); await pull(); }
+    if(onLoad){ await pull(); if(isDirty()) await push(); }
+    else { if(isDirty() || manual) await push(); await pull(); }
     state.lastSync = Date.now(); saveLocal(); setSync('ok');
-    if(document.activeElement?.dataset?.in === undefined) render(); else derive();
+    // never rebuild the screen while the user is typing or the capture sheet is open
+    if(typing() || $('#sheet').classList.contains('open')){ pendingRender = true; derive(); } else render();
     if(manual) toast('Synced with Google Sheets');
   }catch(err){
     setSync('err', String(err.message||err)); if(manual) toast('Sync failed: '+(err.message||err));
@@ -1033,43 +1544,52 @@ async function syncNow(manual, onLoad){
 /* =====================================================================
    REPORTS / EXPORT
    ===================================================================== */
-const COLS = ['date','workoutPct','dietPct','moversPct','sleepHrs','waterMl','earning','bank','clients','deepWork','rating','wdScore','notes'];
-function rangeDates(){ const t = today(); const n = { today:0, week:6, month:29 }[ui.range]; return [addDays(t,-n), t]; }
-function collectRows(){
-  const [from,to] = rangeDates(), rows = [];
-  for(let d=from; d<=to; d=addDays(d,1)){
-    const r = d===today() ? snap(d) : state.history[d];
-    if(r) rows.push({ ...r, wdScore: state.wdScores[d]||0 });
-  }
-  return { from, to, rows };
+function rangeDates(){ const t = today(); const n = { today:0, week:6, fortnight:14, month:29 }[ui.range]; return [addDays(t,-n), t]; }
+function rowFor(ds){
+  if(logged(ds)){ const w = woStats(ds), dt = dietStats(ds), h = habits(ds), d = peek(ds);
+    return { date:ds, workoutScore:w.score??'', workoutPct:w.pct, exercisesDone:w.full, setsDone:w.setsD, repsDone:w.repsD, warmup:d.wo?.warm?1:0, stretch:d.wo?.stretch?1:0,
+      dietPct:dt.pct, mealsLogged:dt.done, mealsOnTime:dt.ontime, mealsLate:dt.late, waterMl:dt.water, creatine:d.cre?1:0, highProtein:d.protein?1:0,
+      moversPct:moverCount(ds)*20, wake:d.sleep.wake, slept:d.sleep.slept, sleepHrs:h.hrs??'', wakeOnTime:h.wakeOk==null?'':+h.wakeOk, sleepOnTime:h.sleepOk==null?'':+h.sleepOk,
+      steps:d.j.steps, dayRating:d.j.rate||'', wealthActivity:d.j.wealth?1:0, wealthNote:d.j.wn, deepWork:d.dw, habits:`${h.done}/${h.total}`,
+      weight:d.per?.weight||'', journal:d.j.text }; }
+  const r = state.history[ds]; if(!r) return null;
+  return { date:ds, workoutScore:r.rating, workoutPct:r.workoutPct, dietPct:r.dietPct, waterMl:r.waterMl, moversPct:r.moversPct, sleepHrs:r.sleepHrs, deepWork:r.deepWork };
 }
+const COLS = ['date','workoutScore','workoutPct','exercisesDone','setsDone','repsDone','warmup','stretch','dietPct','mealsLogged','mealsOnTime','mealsLate','waterMl','creatine','highProtein',
+  'moversPct','wake','slept','sleepHrs','wakeOnTime','sleepOnTime','steps','dayRating','wealthActivity','wealthNote','deepWork','habits','weight','journal'];
+function collectRows(){ const [from,to] = rangeDates(), rows = []; for(let d=from; d<=to; d=addDays(d,1)){ const r = rowFor(d); if(r) rows.push(r); } return { from, to, rows }; }
 function reportText({from,to,rows}){
-  const label = { today:'Today', week:'Last Week', month:'Last Month' }[ui.range];
-  const avg = k => rows.length ? (rows.reduce((a,r)=>a+(Number(r[k])||0),0)/rows.length) : 0;
-  const last = rows[rows.length-1] || {};
-  const notes = state.notes.filter(n=>{ const d = ymd(new Date(n.ts)); return d>=from && d<=to; }).sort((a,b)=>a.ts-b.ts);
+  const label = { today:'Today', week:'Last 7 days', fortnight:'Last 15 days', month:'Last 30 days' }[ui.range];
+  const s = rangeStats(from,to), cs = challengeStats(), cur = monthKey(today());
   const L = [];
-  L.push('RAHERISHI LIFE OS — REPORT', `${label}: ${from} → ${to}`, `Days logged: ${rows.length}`, '');
-  L.push('HEALTH (averages)',
-    `  Workout ${avg('workoutPct').toFixed(0)}%  |  Diet ${avg('dietPct').toFixed(0)}%  |  Movers ${avg('moversPct').toFixed(0)}%`,
-    `  Sleep ${avg('sleepHrs').toFixed(1)}h  |  Water ${(avg('waterMl')/1000).toFixed(1)}L  |  Rating ${avg('rating').toFixed(1)}/5`, '');
-  L.push('WEALTH (latest)',
-    `  Earning ${inr(Number(last.earning)||0)} / ${inr(TARGETS.earning)}`,
-    `  Bank ${inr(Number(last.bank)||0)} / ${inr(TARGETS.bank)}`,
-    `  Clients ${Number(last.clients)||0} / ${TARGETS.clients}  |  Deep work avg ${avg('deepWork').toFixed(1)}h / ${TARGETS.dw}h`, '');
-  L.push('DAILY LOG');
-  rows.forEach(r=>L.push(`  ${r.date}  W ${String(r.workoutPct).padStart(3)}%  D ${String(r.dietPct).padStart(3)}%  M ${String(r.moversPct).padStart(3)}%  S ${Number(r.sleepHrs).toFixed(1)}h  H2O ${(Number(r.waterMl)/1000).toFixed(1)}L  DW ${Number(r.deepWork)||0}h  R ${r.rating||0}  Score ${r.wdScore||0}`));
+  L.push('RAHERISHI LIFE OS — REPORT', `${label}: ${from} → ${to}`, `Days logged: ${s.n}`, '');
+  L.push(`${String(cfg.challenge.title).toUpperCase()} — Day ${Math.max(0,Math.min(cs.dayN,cs.len))}/${cs.len}`,
+    `  Sleep routine ${cs.sleep}%  |  Diet + workout ${cs.dietWorkout}%  |  Finance clarity ${cs.finance}%`, '');
+  L.push('WORKOUT', `  Avg score ${s.wavg!=null?s.wavg.toFixed(1):'—'}/5 over ${s.wn} sessions  |  ${s.sets} sets, ${s.reps} reps`);
+  const prog = {};
+  for(let ds=from; ds<=to; ds=addDays(ds,1)) (peek(ds).wo?.ex||[]).forEach(e=>{ const dn = e.s.filter(x=>x.d); if(!dn.length) return; const top = Math.max(...dn.map(x=>num(x.kg)));
+    prog[e.n] = prog[e.n]||{first:top,last:top,n:0}; prog[e.n].last = top; prog[e.n].n++; });
+  Object.entries(prog).forEach(([n,p])=>L.push(`  ${n}: ${p.n} session${p.n>1?'s':''}, top set ${p.first}kg → ${p.last}kg`));
+  L.push('', 'DIET', `  Meals logged ${s.meals}, on time ${s.ontime} (${s.meals?Math.round(s.ontime/s.meals*100):0}%)  |  Water avg ${(s.waterAvg/1000).toFixed(1)}L  |  High-protein ${s.protein}/${s.n} days`);
+  Object.entries(s.late).sort((a,b)=>b[1].c-a[1].c).forEach(([n,v])=>L.push(`  LATE: ${n} ${v.c}× (avg +${hm2(v.sum/v.c)})`));
+  L.push('', 'SLEEP', `  Avg ${s.shAvg!=null?s.shAvg.toFixed(1):'—'}h  |  Woke on time ${s.wakeOk}/${s.wakeN}  |  Slept on time ${s.sleepOk}/${s.sleepN}`,
+    `  Steps avg ${s.stepsAvg??'—'}  |  Day rating avg ${s.rateAvg!=null?s.rateAvg.toFixed(1):'—'}/5`);
+  L.push('', 'WEALTH', `  Money activity ${s.wealth}/${s.n} days  |  Earning ${inr(num(cfg.kpi.earning))}  |  Bank ${inr(num(cfg.kpi.bank))}  |  Clients ${num(cfg.kpi.clients)}`);
+  const od = cfg.tasks.filter(t=>t.m<cur && num(t.done)<Math.max(1,num(t.qty))), tm = cfg.tasks.filter(t=>t.m===cur);
+  if(od.length) L.push('  OVERDUE: '+od.map(t=>`${t.t} (${num(t.done)}/${Math.max(1,num(t.qty))}, since ${monthName(t.m)})`).join('; '));
+  if(tm.length) L.push(`  This month: ${tm.filter(t=>num(t.done)>=Math.max(1,num(t.qty))).length}/${tm.length} tasks done`);
+  L.push('', 'DAILY LOG');
+  rows.forEach(r=>L.push(`  ${r.date}  Gym ${r.workoutScore===''||r.workoutScore==null?'-':r.workoutScore}/5  Diet ${r.dietPct??'-'}%  H2O ${(num(r.waterMl)/1000).toFixed(1)}L  Sleep ${r.sleepHrs||'-'}h  Wake ${r.wake||'-'}  Habits ${r.habits||'-'}`));
   if(!rows.length) L.push('  (no days in range yet)');
-  L.push('', `NOTES (${notes.length})`);
+  const notes = state.notes.filter(n=>{ const d = ymd(new Date(n.ts)); return d>=from && d<=to; }).sort((a,b)=>a.ts-b.ts);
+  L.push('', `NOTES & IDEAS (${notes.length})`);
   notes.forEach(n=>{ const d = new Date(n.ts); L.push(`  [${n.tag}] ${ymd(d)} ${pad(d.getHours())}:${pad(d.getMinutes())} — ${n.text.replace(/\n/g,' ')}`); });
+  const js = rows.filter(r=>r.journal); if(js.length){ L.push('', 'JOURNAL'); js.forEach(r=>L.push(`  ${r.date}: ${String(r.journal).replace(/\n/g,' ')}`)); }
   L.push('', `Generated ${new Date().toLocaleString('en-IN')}`);
   return L.join('\n');
 }
 async function buildReport(fetchRemote){
-  if(fetchRemote && state.sheetsUrl){
-    const [from,to] = rangeDates();
-    try{ await pull(from,to); saveLocal(); }catch(e){ toast('Using local data — Sheets unreachable'); }
-  }
+  if(fetchRemote && state.sheetsUrl){ const [from,to] = rangeDates(); try{ await pull(from,to); saveLocal(); }catch(e){ toast('Using phone data — Sheets unreachable'); } }
   const data = collectRows();
   const pre = document.getElementById('report'); if(pre) pre.textContent = reportText(data);
   return data;
@@ -1077,29 +1597,35 @@ async function buildReport(fetchRemote){
 async function exportFile(kind){
   toast(state.sheetsUrl ? 'Fetching full history…' : 'Building report…');
   const data = await buildReport(true);
-  let content, mime;
-  if(kind==='csv'){
-    const q = v => { const s = String(v??''); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
-    content = [COLS.join(','), ...data.rows.map(r=>COLS.map(c=>q(r[c])).join(','))].join('\n');
-    mime = 'text/csv;charset=utf-8';
-  } else { content = reportText(data); mime = 'text/plain;charset=utf-8'; }
+  const q = v => { const s = String(v??''); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
+  let content, mime = 'text/csv;charset=utf-8', ext = 'csv', name = 'daily';
+  if(kind==='csv') content = [COLS.join(','), ...data.rows.map(r=>COLS.map(c=>q(r[c])).join(','))].join('\n');
+  else if(kind==='excsv'){ name = 'gym'; const L = ['date,split,group,exercise,set,kg,reps,done'];
+    for(let ds=data.from; ds<=data.to; ds=addDays(ds,1)){ const wo = peek(ds).wo; if(!wo) continue;
+      wo.ex.forEach(e=>e.s.forEach((s,j)=>L.push([ds,wo.split,e.g==='p'?'main':'support',e.n,j+1,num(s.kg),num(s.reps),s.d?1:0].map(q).join(',')))); }
+    content = L.join('\n'); }
+  else { content = reportText(data); mime = 'text/plain;charset=utf-8'; ext = 'txt'; name = 'report'; }
   const blob = new Blob([content], { type:mime }), url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = `lifeos-${ui.range}-${today()}.${kind}`;
+  const a = document.createElement('a'); a.href = url; a.download = `lifeos-${name}-${ui.range}-${today()}.${ext}`;
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 1500);
-  toast(kind.toUpperCase()+' downloaded');
+  toast(ext.toUpperCase()+' downloaded');
 }
 
 /* =====================================================================
    BOOT
    ===================================================================== */
-rollover();
+saveLocal();
 render(true);
 syncNow(false, true);
-setInterval(()=>{ if(rollover()) render(); if(state.sheetsUrl && (state.dirty || state.queue.length || Date.now()-state.lastSync>120000)) syncNow(false); else paintSync(); }, 30000);
+if(state.migrated){ state.migrated = false; saveLocal(); setTimeout(()=>toast('Upgraded to Life OS v4 — your data came along'), 800); }
+setInterval(()=>{
+  if(rollover()){ if(typing()) pendingRender = true; else render(); }
+  if(state.sheetsUrl && (isDirty() || Date.now()-state.lastSync>120000)) syncNow(false); else paintSync();
+}, 30000);
 if('serviceWorker' in navigator && location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{});
 document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState==='visible'){ if(rollover()) render(); syncNow(false); }
-  else if(state.sheetsUrl && state.dirty) syncNow(false);
+  else if(state.sheetsUrl && isDirty()) syncNow(false);
 });
 </script>
 </body>
