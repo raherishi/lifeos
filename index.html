@@ -369,13 +369,16 @@ const isDirty = () => state.dirty.length>0 || state.cfgDirty;
 const splitKey = date => DAY_SPLIT[parseD(date).getDay()];
 function ensureWo(date = ui.date){
   const d = day(date);
-  if(!d.wo){
-    const key = splitKey(date), sp = cfg.splits[key];
-    const ex = sp.ex.map((e,i)=>({ n:e.n, g:i<sp.pc?'p':'s', s:e.sets.map(x=>({ kg:x.kg, reps:x.reps, d:false })) }));
-    d.wo = { split:key, ex, target:ex.reduce((a,e)=>a+e.s.reduce((b,x)=>b+num(x.reps),0),0), warm:false, stretch:false, push:'', squat:'' };
-  }
+  if(!d.wo) d.wo = buildWo(splitKey(date));
   return d.wo;
 }
+function buildWo(key, keep){          // fresh workout for a split; keep = warm-up / stretch / home workout from the old one
+  const sp = cfg.splits[key];
+  const ex = sp.ex.map((e,i)=>({ n:e.n, g:i<sp.pc?'p':'s', s:e.sets.map(x=>({ kg:x.kg, reps:x.reps, d:false })) }));
+  return { split:key, ex, target:ex.reduce((a,e)=>a+e.s.reduce((b,x)=>b+num(x.reps),0),0),
+    warm:!!keep?.warm, stretch:!!keep?.stretch, push:keep?.push||'', squat:keep?.squat||'' };
+}
+const SPLIT_PICK = [['chest','Chest'],['back','Back'],['shoulder','Shoulder'],['legs','Legs'],['rest','Rest']];
 /* Auto workout score (Rishi's rules):
    5 = every set + warm-up + stretch
    4 = 80%+ of planned reps, or all but 1 exercise complete
@@ -619,7 +622,13 @@ function vHealth(){
           style="${wo.stretch?`background:${G};color:#0A0A0F`:'background:#1F1F25;color:#94A3B8'}">${ic(wo.stretch?'check':'wind','','width:14px;height:14px;stroke-width:2.6')} Stretch ${esc(cfg.goals.stretch)}m</button>
       </div>
     </div>
-    ${key==='rest'?`<div class="sub p-3 sm sec">Sunday is rest + recovery. Log a warm-up / mobility or a home workout below if you did one.</div>`:''}
+    <div class="grid grid-cols-5 gap-1.5">
+      ${SPLIT_PICK.map(([k,l])=>{ const on = k===key, pl = k===splitKey(date);
+        return `<button class="py-2 rounded-full ui font-semibold press" data-act="split:${k}" aria-pressed="${on}"
+          style="${on?`background:${G};color:#0A0A0F`:`background:#1F1F25;color:#94A3B8;${pl?'box-shadow:inset 0 0 0 1px rgba(34,197,94,.45)':''}`}">${l}</button>`; }).join('')}
+    </div>
+    ${key!==splitKey(date)?`<p class="ui mut px-1 -mt-1">Switched from plan (${esc(cfg.splits[splitKey(date)].name)}). Tap the outlined chip to go back.</p>`:''}
+    ${key==='rest'?`<div class="sub p-3 sm sec">Rest + recovery. Log a warm-up / mobility or a home workout below if you did one.</div>`:''}
     ${prim.length?`<div class="flex items-center justify-between px-1"><span class="lbl" style="color:${G}">${esc(sp.p)} • ${prim.length}</span>
       <span class="ui mut flex items-center gap-1"><span class="w-2 h-2 rounded-full" style="background:${SETC[1]}"></span>1 <span class="w-2 h-2 rounded-full" style="background:${SETC[2]}"></span>2 <span class="w-2 h-2 rounded-full" style="background:${SETC[3]}"></span>3 sets</span></div>
       <div class="space-y-1.5">${prim.map(([e,i])=>exRow(e,i)).join('')}</div>`:''}
@@ -1352,6 +1361,9 @@ document.addEventListener('click', e=>{
     case 'openEx': ui.openEx[a] = !ui.openEx[a]; render(); return;
     case 'saveDefault': { const wo = ensureWo(date), e = wo.ex[+a], sp = cfg.splits[wo.split];
       if(sp?.ex[+a]){ sp.ex[+a].n = e.n; sp.ex[+a].sets = e.s.map(s=>({ kg:num(s.kg), reps:num(s.reps) })); markCfg(); toast(e.n+' saved as plan default'); } return; }
+    case 'split': { const d = day(date), old = d.wo; if(old?.split===a) return;
+      if(old && old.ex.some(e=>e.s.some(s=>s.d)) && !confirm('Sets already logged for '+cfg.splits[old.split].name+'. Switch to '+cfg.splits[a].name+' and clear them?')) return;
+      d.wo = buildWo(a, old); ui.openEx = {}; markDay(); render(); toast(cfg.splits[a].name); return; }
     case 'woFlag': { const wo = ensureWo(date); wo[a] = !wo[a]; markDay(); render(); return; }
     case 'water': { day(date).water.push({ ml:+a, t:isToday?nowHM():'' }); markDay(); render(); toast(`+${a} ml`); return; }
     case 'unwater': day(date).water.splice(+a,1); markDay(); render(); return;

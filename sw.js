@@ -1,5 +1,5 @@
 /* Life OS offline cache: app shell first, network updates in background. */
-const CACHE = 'lifeos-v4-2';
+const CACHE = 'lifeos-v4-3';
 const SHELL = ['./', './index.html', './manifest.json', './apple-touch-icon.png', './icon-192.png', './icon-512.png', './icon-32.png',
   'https://cdn.tailwindcss.com/3.4.17'];
 
